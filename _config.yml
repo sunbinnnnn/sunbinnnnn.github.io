@@ -100,7 +100,7 @@ ignore:
 theme: brewski
 theme_config:
   logo:
-  google_analytics: UA-XXXXXXXX-X
+# google_analytics: YourID 
   copyright:
     since: 2020 
     name: Neil
