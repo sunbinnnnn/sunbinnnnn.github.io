@@ -102,9 +102,9 @@ theme_config:
   logo:
   google_analytics: UA-XXXXXXXX-X
   copyright:
-    since: 2016
-    name: John Doe
-    url: https://www.example.org/john-doe
+    since: 2020 
+    name: Neil
+    url: https://sunbinnnnn.github.io/
   menu:
     Home: /
     About: /about
