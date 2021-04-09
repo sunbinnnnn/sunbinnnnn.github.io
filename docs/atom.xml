@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2021-04-08T13:38:51.579Z</updated>
+  <updated>2021-04-09T05:44:33.836Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,19 +17,12 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>系统服务</title>
-    <link href="http://example.com/2021/04/08/%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/"/>
-    <id>http://example.com/2021/04/08/%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/</id>
-    <published>2021-04-08T13:38:04.000Z</published>
-    <updated>2021-04-08T13:38:51.579Z</updated>
+    <title>容器文件系统</title>
+    <link href="http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/"/>
+    <id>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/</id>
+    <published>2021-04-09T05:44:33.000Z</published>
+    <updated>2021-04-09T05:44:33.836Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="系统服务介绍"><a href="#系统服务介绍" class="headerlink" title="系统服务介绍"></a>系统服务介绍</h1>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;系统服务介绍&quot;&gt;&lt;a href=&quot;#系统服务介绍&quot; class=&quot;headerlink&quot; title=&quot;系统服务介绍&quot;&gt;&lt;/a&gt;系统服务介绍&lt;/h1&gt;</summary>
-      
     
     
     
@@ -37,22 +30,103 @@
   </entry>
   
   <entry>
-    <title>Hello World</title>
-    <link href="http://example.com/2021/04/08/hello-world/"/>
-    <id>http://example.com/2021/04/08/hello-world/</id>
-    <published>2021-04-08T12:35:09.806Z</published>
-    <updated>2021-04-08T12:35:09.806Z</updated>
+    <title>linux container</title>
+    <link href="http://example.com/2021/04/09/linux-container/"/>
+    <id>http://example.com/2021/04/09/linux-container/</id>
+    <published>2021-04-09T05:44:06.000Z</published>
+    <updated>2021-04-09T05:44:06.883Z</updated>
     
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>cgroup</title>
+    <link href="http://example.com/2021/04/09/cgroup/"/>
+    <id>http://example.com/2021/04/09/cgroup/</id>
+    <published>2021-04-09T05:43:53.000Z</published>
+    <updated>2021-04-09T05:43:53.193Z</updated>
+    
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>容器网络</title>
+    <link href="http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/"/>
+    <id>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/</id>
+    <published>2021-04-09T05:43:47.000Z</published>
+    <updated>2021-04-09T05:43:47.586Z</updated>
+    
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>K8S Operator</title>
+    <link href="http://example.com/2021/04/09/K8S-Operator/"/>
+    <id>http://example.com/2021/04/09/K8S-Operator/</id>
+    <published>2021-04-09T05:24:48.000Z</published>
+    <updated>2021-04-09T05:24:48.123Z</updated>
+    
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>内核协议栈调用</title>
+    <link href="http://example.com/2021/04/09/%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88%E8%B0%83%E7%94%A8/"/>
+    <id>http://example.com/2021/04/09/%E5%86%85%E6%A0%B8%E5%8D%8F%E8%AE%AE%E6%A0%88%E8%B0%83%E7%94%A8/</id>
+    <published>2021-04-09T05:22:47.000Z</published>
+    <updated>2021-04-09T05:22:47.889Z</updated>
+    
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>文件IO调用</title>
+    <link href="http://example.com/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/"/>
+    <id>http://example.com/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/</id>
+    <published>2021-04-09T05:22:18.000Z</published>
+    <updated>2021-04-09T05:22:18.673Z</updated>
+    
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Linux启动过程刨析</title>
+    <link href="http://example.com/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/"/>
+    <id>http://example.com/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</id>
+    <published>2021-04-08T13:38:04.000Z</published>
+    <updated>2021-04-09T05:44:51.200Z</updated>
+    
+    <content type="html"><![CDATA[<p>Linux启动过程主要包含boot和startup两个阶段</p><h3 id="Boot-引导-阶段"><a href="#Boot-引导-阶段" class="headerlink" title="Boot(引导)阶段"></a>Boot(引导)阶段</h3><p>Boot阶段始于按下开机键或通过内核指令执行reboot操作，之后会经历以下过程：</p><h4 id="1-BIOS-POST"><a href="#1-BIOS-POST" class="headerlink" title="1.BIOS POST"></a>1.BIOS POST</h4><h4 id="2-GRUB2"><a href="#2-GRUB2" class="headerlink" title="2.GRUB2"></a>2.GRUB2</h4><h5 id="Stage-1"><a href="#Stage-1" class="headerlink" title="Stage 1"></a>Stage 1</h5><h5 id="Stage-1-5"><a href="#Stage-1-5" class="headerlink" title="Stage 1.5"></a>Stage 1.5</h5><h5 id="Stage-2"><a href="#Stage-2" class="headerlink" title="Stage 2"></a>Stage 2</h5><h5 id="Kernel"><a href="#Kernel" class="headerlink" title="Kernel"></a>Kernel</h5>]]></content>
     
     
       
       
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for</summary>
+    <summary type="html">&lt;p&gt;Linux启动过程主要包含boot和startup两个阶段&lt;/p&gt;
+&lt;h3 id=&quot;Boot-引导-阶段&quot;&gt;&lt;a href=&quot;#Boot-引导-阶段&quot; class=&quot;headerlink&quot; title=&quot;Boot(引导)阶段&quot;&gt;&lt;/a&gt;Boot(引导)阶段&lt;/h3&gt;&lt;p&gt;B</summary>
       
     
     
     
+    
+    <category term="system" scheme="http://example.com/tags/system/"/>
     
   </entry>
   
