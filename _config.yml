@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: Neil's blog 
 subtitle: ''
 description: ''
 keywords:
-author: John Doe
+author: NeilSun
 language: en
 timezone: ''
 
@@ -97,20 +97,20 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: brewski
-theme_config:
-  logo:
-# google_analytics: YourID 
-  copyright:
-    since: 2020 
-    name: Neil
-    url: https://sunbinnnnn.github.io/
-  menu:
-    Home: /
-    About: /about
-    GitHub: https://github.com/tiaanduplessis
-    RSS: /atom.xml
-
+theme: vexo
+# theme_config:
+#  logo:
+## google_analytics: YourID 
+#  copyright:
+#    since: 2020 
+#    name: Neil
+#    url: https://sunbinnnnn.github.io/
+#  menu:
+#    Home: /
+#    About: /about
+#    GitHub: https://github.com/tiaanduplessis
+#    RSS: /atom.xml
+#
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:

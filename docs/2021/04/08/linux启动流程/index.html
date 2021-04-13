@@ -1,6 +1,496 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="index, follow"><title>Linux启动过程刨析 • Hexo</title><meta name="description" content="Linux启动过程刨析 - John Doe"><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="https://unpkg.com/nanoreset@3.0.1/nanoreset.min.css"><link rel="stylesheet" href="/css/theme.css"><link rel="search" type="application/opensearchdescription+xml" href="/atom.xml" title="Hexo"><meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
-</head><body><div class="wrap" id="barba-wrapper"><header><h1 class="branding"><a href="/" title="Hexo">Hexo</a></h1><ul class="nav nav-list"><li class="nav-list-item"><a class="nav-list-link no-barba" href="/" target="_self">HOME</a></li><li class="nav-list-item"><a class="nav-list-link no-barba" href="/about" target="_self">ABOUT</a></li><li class="nav-list-item"><a class="nav-list-link no-barba" href="/archives" target="_self">ARCHIVES</a></li><li class="nav-list-item"></ul></header><div class="barba-container"><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">Linux启动过程刨析</h1><div class="post-info"><a></a>2021-04-08</div><div class="post-content"><p>Linux启动过程主要包含boot和startup两个阶段</p>
-<h3 id="Boot-引导-阶段"><a href="#Boot-引导-阶段" class="headerlink" title="Boot(引导)阶段"></a>Boot(引导)阶段</h3><p>Boot阶段始于按下开机键或通过内核指令执行reboot操作，之后会经历以下过程：</p>
-<h4 id="1-BIOS-POST"><a href="#1-BIOS-POST" class="headerlink" title="1.BIOS POST"></a>1.BIOS POST</h4><h4 id="2-GRUB2"><a href="#2-GRUB2" class="headerlink" title="2.GRUB2"></a>2.GRUB2</h4><h5 id="Stage-1"><a href="#Stage-1" class="headerlink" title="Stage 1"></a>Stage 1</h5><h5 id="Stage-1-5"><a href="#Stage-1-5" class="headerlink" title="Stage 1.5"></a>Stage 1.5</h5><h5 id="Stage-2"><a href="#Stage-2" class="headerlink" title="Stage 2"></a>Stage 2</h5><h5 id="Kernel"><a href="#Kernel" class="headerlink" title="Kernel"></a>Kernel</h5></div></article></div></main><footer><div class="paginator"><a class="prev" href="/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/">prev</a></div><div class="copyright"><p>&copy; 2020 - 2021 <a target="_blank" rel="noopener" href="https://sunbinnnnn.github.io/">Neil</a><br>Powered by <a href="https://hexo.io/" rel="noreferrer" target="_blank">Hexo</a></p></div></footer></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/barba.js/1.0.0/barba.min.js"></script><script>document.addEventListener('DOMContentLoaded', function() {
-    Barba.Pjax.start()
-})</script></body></html>
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  <meta name="description" content="Neil&#39;s blog">
+  <meta name="keyword" content="k8s">
+  
+    <link rel="shortcut icon" href="/css/images/logo.png">
+  
+  <title>
+    
+      Linux启动过程刨析 | Neil&#39;s blog
+    
+  </title>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/tomorrow.min.css" rel="stylesheet">
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/css/plugins/gitment.css">
+
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/geopattern/1.2.3/js/geopattern.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+  
+    
+<script src="/js/qrious.js"></script>
+
+  
+  
+    
+<script src="/js/gitment.js"></script>
+
+  
+  
+  
+    <!-- MathJax support START -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <!-- MathJax support END -->
+  
+
+
+  
+<meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Neil's blog" type="application/atom+xml">
+</head>
+<div class="wechat-share">
+  <img src="/css/images/logo.png" />
+</div>
+
+  <body>
+    <header class="header fixed-header">
+  <div class="header-container">
+    <a class="home-link" href="/">
+      <div class="logo"></div>
+      <span>Neil's blog</span>
+    </a>
+    <ul class="right-list">
+      
+        <li class="list-item">
+          
+            <a href="/" class="item-link">Home</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/tags/" class="item-link">Tags</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/archives/" class="item-link">Archives</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/project/" class="item-link">Projects</a>
+          
+        </li>
+      
+        <li class="list-item">
+          
+            <a href="/about/" class="item-link">About</a>
+          
+        </li>
+      
+    </ul>
+    <div class="menu">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </div>
+    <div class="menu-mask">
+      <ul class="menu-list">
+        
+          <li class="menu-item">
+            
+              <a href="/" class="menu-link">Home</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/tags/" class="menu-link">Tags</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/archives/" class="menu-link">Archives</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/project/" class="menu-link">Projects</a>
+            
+          </li>
+        
+          <li class="menu-item">
+            
+              <a href="/about/" class="menu-link">About</a>
+            
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</header>
+
+    <div id="article-banner">
+  <h2>Linux启动过程刨析</h2>
+  <p class="post-date">2021-04-08</p>
+  <div class="arrow-down">
+    <a href="javascript:;"></a>
+  </div>
+</div>
+<main class="app-body flex-box">
+  <!-- Article START -->
+  <article class="post-article">
+    <section class="markdown-content"><p>Linux启动过程主要包含boot和startup两个阶段。</p>
+<p>*本文不包含硬件相关的加载细节</p>
+<h3 id="引导-Boot-阶段"><a href="#引导-Boot-阶段" class="headerlink" title="引导(Boot)阶段"></a>引导(Boot)阶段</h3><p>Boot阶段始于按下开机键或通过内核指令执行reboot操作，之后会经历以下过程：</p>
+<span id="more"></span>
+
+<h4 id="1-BIOS-POST"><a href="#1-BIOS-POST" class="headerlink" title="1.BIOS POST"></a>1.BIOS POST</h4><p>第一阶段启动和Linux本身关系不大，主要围绕硬件启动部分，在绝大大数操作系统上行为是一致的。当计算机被启动时，首先运行的是POST（Power On Self Test 开机自检）过程，这是BIOS（Basic I/O System）的一部分。</p>
+<p>当IBM在1981年设计了第一台PC开始，BIOS就被设计为初始化硬件的组件。POST是BIOS检查计算机硬件，并确保计算机硬件功能正常的阶段。如果POST失败了，计算机将无法正常启动，Boot程序也不会继续。</p>
+<p>BIOS POST过程中会检查硬件的基本引导能力，当定位到可引导设备上的引导扇区时，会发出BIOS中断指令INT 13H中断BIOS POST过程。第一个被找到的引导扇区上包含了一个可用的的引导设备。第一个被找到的引导扇区将会包含一个可用的引导记录并被加载到内存，随后将引导的控制权转移从引导扇区加载的代码中。</p>
+<p>加载引导扇区实际上是引导加载程序的第一阶段。大多数Linux发行版使用了三种引导加载程序：GRUB、GRUB2和LILO，目前用的最多的是GRUB2。</p>
+<h4 id="2-GRUB2"><a href="#2-GRUB2" class="headerlink" title="2.GRUB2"></a>2.GRUB2</h4><p>GRUB2的全称是“GRand Unified Bootloader, version 2”，目前是Linux发行版中最主流的引导加载程序（bootloader）。GRUB2的作用是让计算机能够灵活得找到操作系统Kernel并且加载到内存中。（下文中将用GRUB指代GRUB2）。</p>
+<p>GRUB被设计为多引导规范（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Multiboot_specification">Multiboot specification</a>）支持，这使得GRUB可以引导Linux的多数版本以及其他开放操作系统，也可以链接到其他专有操作系统的引导记录（例如通过GRUB加载Windows的引导程序）。</p>
+<p>GRUB允许用户选择从任意给定的Linux发行版的不通内核中引导，如果因为内核版本变化导致引导失败，GRUB还支持了故障回滚机制，能够引导到之前的内核版本。GRUB可以使用 <code>/boot/grub/grub.conf</code> 进行回滚策略的变更。</p>
+<p>以下将介绍GRUB2的三个引导阶段：</p>
+<h5 id="Stage-1"><a href="#Stage-1" class="headerlink" title="Stage 1"></a>Stage 1</h5><p>在BIOS POST的POST阶段的末尾，BIOS会搜索连接的磁盘上的引导记录，通常位于主引导记录（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Master_boot_record">MBR</a>）中，POST会找到第一个引导记录并加载到内存中，然后开始执行引导记录。GRUB2 stage 1即执行引导程序代码，这块被设计得非常小，因为它必须与分区表一起放在硬盘驱动器的第一个512字节扇区中。在经典的通用MBR中，为实际引导代码分区的空间量是446字节。Stage 1中的446字节文件名为<code>boot.img</code>，头部的446中不包含单独的引导分区。</p>
+<p>由于引导记录大小的限制，使得其无法直接获取文件系统结构，因此，Stage 1阶段的唯一目的是定义并加载Stage 1.5，GRUB Stage 1.5阶段必须位于引导记录本身和驱动器第一个分区之间，GRUB Stage 1.5被加载到Ram后，控制权随即转为Stage 1.5</p>
+<h5 id="Stage-1-5"><a href="#Stage-1-5" class="headerlink" title="Stage 1.5"></a>Stage 1.5</h5><p>Stage 1.5的工作主要是加载寻找 /boot目录中Stage 2阶段所必须的驱动。</p>
+<p>GRUB Stage 1.5必须位于引导记录本身与磁盘驱动器第一个分区之间的空间中。硬盘驱动器的第一个分区从扇区63开始，而MBR在扇区0剩下的62个扇区（512字节-31744字节）中存放了执行Stage 1.5的<code>core.img</code>，<code>core.img</code>大小被设计为25389字节，可以被存放在MBR和磁盘第一个分区之间。</p>
+<p>对于Stage 1.5来说，它能够存放比Stage 1多的多的代码，一般来说，一些常见文件系统的驱动程序会存放在此（例如EXT、FAT、NTFS等）。GRUB2的core.img比GRUB1更复杂，功能更强大，GRUB2的core.img可以直接位于标准EXT文件系统上（不支持放在逻辑卷上），所以Stage 2的标准路径是<code>/boot</code> 目录，一般是<code>/boot/grub2</code>。</p>
+<p>需要注意的是，<code>/boot</code>目录必须创建在GRUB支持的文件系统上。</p>
+<h5 id="Stage-2"><a href="#Stage-2" class="headerlink" title="Stage 2"></a>Stage 2</h5><p>与GRUB1一样，GRUB2也支持从多种Linux内核之一进行引导。红帽软件包管理器DNF支持保留内核的多个版本，因此，如果最新版本的内核出现问题，则可以引导较旧版本的内核。默认情况下，GRUB提供已安装内核的预引导菜单，包括救援选项和恢复选项（如果已配置）。</p>
+<p>GRUB Stage2阶段所需文件都在 <code>/boot/grub2</code>目录中，GRUB Stage2阶段中没有Stage1和1.5那样的image文件，主要会由运行时Kernel Modules构成，一般从<code>/boot/grub2/i386-pc</code>目录中加载。</p>
+<p>GRUB Stage2的职责主要是定位Linux Kernel并加载到RAM中，并将整个控制权移交给kernel。</p>
+<p>Kernel及其相关文件都位于/boot目录中，Kernel文件一般以vmlinuz开头命名，通过列出 /boot 目录的内容，可以查看当前系统安装的内核。</p>
+<p>GRUB2 和 1都支持多内核引导。RedHat的包管理系统DNF支持在仓库中保留多个Kernel版本，如果最新版本内核出现问题，可以通过GRUB提供的内核预引导菜单（pre-boot menu），引导前一个版本的内核。</p>
+<h5 id="Kernel"><a href="#Kernel" class="headerlink" title="Kernel"></a>Kernel</h5><p>为了节省磁盘空间，所有的内核均采用自解压的压缩格式。内核、初始RAM磁盘映像（InitRamFs）以及硬盘的社区映射都位于 /boot目录中。</p>
+<p>选定的内核被加载到内存开始执行时，首先进行自解压，提取可执行作业，并加载。内核提取后首先systemd，并将启动控制权进行交接。</p>
+<p>Boot阶段到此全部结束，此时，Linux Kernel和systemd程序正在运行。</p>
+<h3 id="启动-Startup-阶段"><a href="#启动-Startup-阶段" class="headerlink" title="启动(Startup)阶段"></a>启动(Startup)阶段</h3><p>Startup阶段和Boot阶段完成后随即开始，主要工作是让计算机能够真正执行生产作业。</p>
+<h5 id="0号进程和1号进程"><a href="#0号进程和1号进程" class="headerlink" title="0号进程和1号进程"></a>0号进程和1号进程</h5><p>systemd是系统的1号进程，在1号进程启动前，系统会自动创建0号进程，0号进程的pid=0，也是唯一一个没有通过<code>fork</code>或者<code>kernel_thread</code>生成的进程。</p>
+<p>0号进程是系统所有进程的先祖，进程描述符<code>init_task</code>是内核静态创建的，而它在初始化的时候通过<code>kernel_thread</code>的方式创建了两个内核线程，分别是<code>kernel_init</code>和<code>kthreadd</code>，其中<code>kernel_init</code>为1号进程。</p>
+<p>0号进程创建1号进程的方式如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel_thread(kernel_init, <span class="literal">NULL</span>, CLONE_FS);</span><br></pre></td></tr></table></figure>
+
+<p>我们发现1号进程的执行函数就是kernel_init，kernel_init函数将完成设备驱动程序的初始化，并调用init_post函数启动用户空间的init进程即systemd。</p>
+<h5 id="systemd"><a href="#systemd" class="headerlink" title="systemd"></a>systemd</h5><p>systemd是所有用户进程的祖先，它负责使Linux主机达到可以完成生产性工作的状态。它的某些功能比旧的init程序要更为广泛。</p>
+<p>首先，systemd会挂载<code>/etc/fstab</code>定义的文件系统，包括所有交换分区和普通分区。此时，它可以访问/etc目录来确定系统配置相关信息。当找到配置文件<code>/etc/systemd/system/default.target</code>时，会使用该配置文件来确定将主机引导到的状态或目标。 <code>default.target</code>文件是指向真实目标文件的链接。对于带GUI界面的系统，通常将其作为<code>graphic.target</code>，等效于旧SystemV init中的runlevel 5。对于不带GUI解密的系统，默认值则为<code>multi-user.target</code>，类似于SystemV中的runlevel 3，<code>emergency.target</code>则与单用户模式相似。</p>
+<p>下表是对systemd targets与的systemV runlevel的比较。 systemd target aliases 由systemd提供，用于向后兼容。target aliases 允许脚本使用init 3这样的SystemV命令来更改运行级别。SystemV命令将转发给systemd进行解释和执行。</p>
+<table>
+<thead>
+<tr>
+<th><strong>SystemV Runlevel</strong></th>
+<th><strong>systemd target</strong></th>
+<th><strong>systemd target aliases</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>halt.target</td>
+<td></td>
+<td>Halts the system without powering it down.</td>
+</tr>
+<tr>
+<td>0</td>
+<td>poweroff.target</td>
+<td>runlevel0.target</td>
+<td>Halts the system and turns the power off.</td>
+</tr>
+<tr>
+<td>S</td>
+<td>emergency.target</td>
+<td></td>
+<td>Single user mode. No services are running; filesystems are not mounted. This is the most basic level of operation with only an emergency shell running on the main console for the user to interact with the system.</td>
+</tr>
+<tr>
+<td>1</td>
+<td>rescue.target</td>
+<td>runlevel1.target</td>
+<td>A base system including mounting the filesystems with only the most basic services running and a rescue shell on the main console.</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>runlevel2.target</td>
+<td>Multiuser, without NFS but all other non-GUI services running.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>multi-user.target</td>
+<td>runlevel3.target</td>
+<td>All services running but command line interface (CLI) only.</td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>runlevel4.target</td>
+<td>Unused.</td>
+</tr>
+<tr>
+<td>5</td>
+<td>graphical.target</td>
+<td>runlevel5.target</td>
+<td>multi-user with a GUI.</td>
+</tr>
+<tr>
+<td>6</td>
+<td>reboot.target</td>
+<td>runlevel6.target</td>
+<td>Reboot</td>
+</tr>
+<tr>
+<td></td>
+<td>default.target</td>
+<td></td>
+<td>This target is always aliased with a symbolic link to either multi-user.target or graphical.target. systemd always uses the default.target to start the system. The default.target should never be aliased to halt.target, poweroff.target, or reboot.target.</td>
+</tr>
+</tbody></table>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">local-fs-pre.target</span><br><span class="line">            |</span><br><span class="line">            v</span><br><span class="line">   (various mounts and   (various swap   (various cryptsetup</span><br><span class="line">    fsck services...)     devices...)        devices...)       (various low-level   (various low-level</span><br><span class="line">            |                  |                  |             services: udevd,     API VFS mounts:</span><br><span class="line">            v                  v                  v             tmpfiles, random     mqueue, configfs,</span><br><span class="line">     local-fs.target      swap.target     cryptsetup.target    seed, sysctl, ...)      debugfs, ...)</span><br><span class="line">            |                  |                  |                    |                    |</span><br><span class="line">            \__________________|_________________ | ___________________|____________________&#x2F;</span><br><span class="line">                                                 \|&#x2F;</span><br><span class="line">                                                  v</span><br><span class="line">                                           sysinit.target</span><br><span class="line">                                                  |</span><br><span class="line">             ____________________________________&#x2F;|\________________________________________</span><br><span class="line">            &#x2F;                  |                  |                    |                    \</span><br><span class="line">            |                  |                  |                    |                    |</span><br><span class="line">            v                  v                  |                    v                    v</span><br><span class="line">        (various           (various               |                (various          rescue.service</span><br><span class="line">       timers...)          paths...)              |               sockets...)               |</span><br><span class="line">            |                  |                  |                    |                    v</span><br><span class="line">            v                  v                  |                    v              rescue.target</span><br><span class="line">      timers.target      paths.target             |             sockets.target</span><br><span class="line">            |                  |                  |                    |</span><br><span class="line">            v                  \_________________ | ___________________&#x2F;</span><br><span class="line">                                                 \|&#x2F;</span><br><span class="line">                                                  v</span><br><span class="line">                                            basic.target</span><br><span class="line">                                                  |</span><br><span class="line">             ____________________________________&#x2F;|                                 emergency.service</span><br><span class="line">            &#x2F;                  |                  |                                         |</span><br><span class="line">            |                  |                  |                                         v</span><br><span class="line">            v                  v                  v                                 emergency.target</span><br><span class="line">        display-        (various system    (various system</span><br><span class="line">    manager.service         services           services)</span><br><span class="line">            |             required for            |</span><br><span class="line">            |            graphical UIs)           v</span><br><span class="line">            |                  |           multi-user.target</span><br><span class="line">            |                  |                  |</span><br><span class="line">            \_________________ | _________________&#x2F;</span><br><span class="line">                              \|&#x2F;</span><br><span class="line">                               v</span><br><span class="line">                     graphical.target</span><br></pre></td></tr></table></figure>
+
+</section>
+    <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#system" >
+    <span class="tag-code">system</span>
+  </a>
+
+      </div>
+    
+    <!-- Tags END -->
+    <!-- NAV START -->
+    
+  <div class="nav-container">
+    <!-- reverse left and right to put prev and next in a more logic postition -->
+    
+    
+      <a class="nav-right" href="/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/">
+        
+          文件IO调用
+        
+        <span class="nav-arrow"> →</span>
+      </a>
+    
+  </div>
+
+    <!-- NAV END -->
+    <!-- 打赏 START -->
+    
+      <div class="money-like">
+        <div class="reward-btn">
+          赏
+          <span class="money-code">
+            <span class="alipay-code">
+              <div class="code-image"></div>
+              <b>使用支付宝打赏</b>
+            </span>
+            <span class="wechat-code">
+              <div class="code-image"></div>
+              <b>使用微信打赏</b>
+            </span>
+          </span>
+        </div>
+        <p class="notice">若你觉得我的文章对你有帮助，欢迎点击上方按钮对我打赏</p>
+      </div>
+    
+    <!-- 打赏 END -->
+    <!-- 二维码 START -->
+    
+      <div class="qrcode">
+        <canvas id="share-qrcode"></canvas>
+        <p class="notice">扫描二维码，分享此文章</p>
+      </div>
+    
+    <!-- 二维码 END -->
+    
+      <!-- Gitment START -->
+      <div id="comments"></div>
+      <!-- Gitment END -->
+    
+  </article>
+  <!-- Article END -->
+  <!-- Catalog START -->
+  
+    <aside class="catalog-container">
+  <div class="toc-main">
+    <strong class="toc-title">Catalog</strong>
+    
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%BC%95%E5%AF%BC-Boot-%E9%98%B6%E6%AE%B5"><span class="toc-nav-text">引导(Boot)阶段</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#1-BIOS-POST"><span class="toc-nav-text">1.BIOS POST</span></a></li><li class="toc-nav-item toc-nav-level-4"><a class="toc-nav-link" href="#2-GRUB2"><span class="toc-nav-text">2.GRUB2</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#Stage-1"><span class="toc-nav-text">Stage 1</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#Stage-1-5"><span class="toc-nav-text">Stage 1.5</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#Stage-2"><span class="toc-nav-text">Stage 2</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#Kernel"><span class="toc-nav-text">Kernel</span></a></li></ol></li></ol></li><li class="toc-nav-item toc-nav-level-3"><a class="toc-nav-link" href="#%E5%90%AF%E5%8A%A8-Startup-%E9%98%B6%E6%AE%B5"><span class="toc-nav-text">启动(Startup)阶段</span></a><ol class="toc-nav-child"><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#0%E5%8F%B7%E8%BF%9B%E7%A8%8B%E5%92%8C1%E5%8F%B7%E8%BF%9B%E7%A8%8B"><span class="toc-nav-text">0号进程和1号进程</span></a></li><li class="toc-nav-item toc-nav-level-5"><a class="toc-nav-link" href="#systemd"><span class="toc-nav-text">systemd</span></a></li></ol></li></ol></li></ol>
+    
+  </div>
+</aside>
+  
+  <!-- Catalog END -->
+</main>
+
+<script>
+  (function () {
+    var url = 'http://example.com/2021/04/08/linux启动流程/';
+    var banner = ''
+    if (banner !== '' && banner !== 'undefined' && banner !== 'null') {
+      $('#article-banner').css({
+        'background-image': 'url(' + banner + ')'
+      })
+    } else {
+      $('#article-banner').geopattern(url)
+    }
+    $('.header').removeClass('fixed-header')
+
+    // error image
+    $(".markdown-content img").on('error', function() {
+      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).css({
+        'cursor': 'default'
+      })
+    })
+
+    // zoom image
+    $(".markdown-content img").on('click', function() {
+      var src = $(this).attr('src')
+      if (src !== 'http://file.muyutech.com/error-img.png') {
+        var imageW = $(this).width()
+        var imageH = $(this).height()
+
+        var zoom = ($(window).width() * 0.95 / imageW).toFixed(2)
+        zoom = zoom < 1 ? 1 : zoom
+        zoom = zoom > 2 ? 2 : zoom
+        var transY = (($(window).height() - imageH) / 2).toFixed(2)
+
+        $('body').append('<div class="image-view-wrap"><div class="image-view-inner"><img src="'+ src +'" /></div></div>')
+        $('.image-view-wrap').addClass('wrap-active')
+        $('.image-view-wrap img').css({
+          'width': `${imageW}`,
+          'transform': `translate3d(0, ${transY}px, 0) scale3d(${zoom}, ${zoom}, 1)`
+        })
+        $('html').css('overflow', 'hidden')
+
+        $('.image-view-wrap').on('click', function() {
+          $(this).remove()
+          $('html').attr('style', '')
+        })
+      }
+    })
+  })();
+</script>
+
+
+  <script>
+    var qr = new QRious({
+      element: document.getElementById('share-qrcode'),
+      value: document.location.href
+    });
+  </script>
+
+
+
+  <script>
+    var gitmentConfig = "yanm1ng";
+    if (gitmentConfig !== 'undefined') {
+      var gitment = new Gitment({
+        id: "Linux启动过程刨析",
+        owner: "yanm1ng",
+        repo: "yanm1ng.github.io",
+        oauth: {
+          client_id: "0f87e490e00ee3fd87ef",
+          client_secret: "4a9d2b148e7971c2201ad12131ce8bf8159ccd2e"
+        },
+        theme: {
+          render(state, instance) {
+            const container = document.createElement('div')
+            container.lang = "en-US"
+            container.className = 'gitment-container gitment-root-container'
+            container.appendChild(instance.renderHeader(state, instance))
+            container.appendChild(instance.renderEditor(state, instance))
+            container.appendChild(instance.renderComments(state, instance))
+            container.appendChild(instance.renderFooter(state, instance))
+            return container;
+          }
+        }
+      })
+      gitment.render(document.getElementById('comments'))
+    }
+  </script>
+
+
+
+
+    <div class="scroll-top">
+  <span class="arrow-icon"></span>
+</div>
+    <footer class="app-footer">
+  <p class="copyright">
+    &copy; 2021 | Proudly powered by <a href="https://hexo.io" target="_blank">Hexo</a>
+    <br>
+    Theme by <a target="_blank" rel="noopener" href="https://github.com/yanm1ng">yanm1ng</a>
+  </p>
+</footer>
+
+<script>
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+</script>
+<script>
+  async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+    FastClick.attach(document.body);
+  })
+</script>
+
+<script>
+  var hasLine = 'true';
+  async("//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js", function(){
+    $('figure pre').each(function(i, block) {
+      var figure = $(this).parents('figure');
+      if (hasLine === 'false') {
+        figure.find('.gutter').hide();
+      }
+      var lang = figure.attr('class').split(' ')[1] || 'code';
+      var codeHtml = $(this).html();
+      var codeTag = document.createElement('code');
+      codeTag.className = lang;
+      codeTag.innerHTML = codeHtml;
+      $(this).attr('class', '').empty().html(codeTag);
+      figure.attr('data-lang', lang.toUpperCase());
+      hljs.highlightBlock(block);
+    });
+  })
+</script>
+<!-- Baidu Tongji -->
+
+
+<script src="/js/script.js"></script>
+
+  </body>
+</html>
