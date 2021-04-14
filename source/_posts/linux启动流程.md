@@ -4,8 +4,11 @@ date: 2021-04-08 21:38:04
 tags: system
 ---
 
-
 Linux启动过程主要包含boot和startup两个阶段。
+
+<!--more-->
+
+
 
 \*本文不包含硬件相关的加载细节
 
@@ -14,8 +17,6 @@ Linux启动过程主要包含boot和startup两个阶段。
 ### 引导(Boot)阶段
 
 Boot阶段始于按下开机键或通过内核指令执行reboot操作，之后会经历以下过程：
-
-<!--more-->
 
 #### 1.BIOS POST
 
@@ -120,7 +121,7 @@ systemd是所有用户进程的祖先，它负责使Linux主机达到可以完�
 | 6                    | reboot.target      | runlevel6.target           | Reboot                                                       |
 |                      | default.target     |                            | This target is always aliased with a symbolic link to either multi-user.target or graphical.target. systemd always uses the default.target to start the system. The default.target should never be aliased to halt.target, poweroff.target, or reboot.target. |
 
-
+每个target都有对应的配置文件可供配置，并且具备相互依赖的特性，下图描述了target的依赖关系。
 
 ```
 local-fs-pre.target
@@ -168,3 +169,26 @@ local-fs-pre.target
                      graphical.target
 ```
 
+根据依赖拓扑完成启动后，Linux系统结束启动过程。
+
+
+
+### 附录：关于initramd的定制
+
+解压：
+
+```xz -dc < initrd.img| cpio -idmv```
+
+打包：
+
+```find . 2>/dev/null | cpio -c -o | xz -9 --format=xz --check=crc32 > /tmp/new.img```
+
+
+
+### 引用
+
+https://opensource.com/article/17/2/linux-boot-and-startup
+
+https://blog.csdn.net/gatieme/article/details/51532804
+
+https://www.golinuxcloud.com/update-rebuild-initrd-image-centos-rhel-7-8/#Method_2_Extract_initrd_image
