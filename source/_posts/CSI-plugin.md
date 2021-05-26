@@ -227,9 +227,36 @@ spec:
       storage: 30Gi
 ```
 
+在PVController watch到动态PVC被声明后，首先会寻找该PVC对应的plugin和storageClass:
 
+```go
+plugin, storageClass, err := ctrl.findProvisionablePlugin(claim)
+```
 
-仍然到PersistentVolumeController(`pkg/controller/volume/persistentvolume/pv_controller.go`)中寻找PVController对StroageClass的处理逻辑：
+这个过程会通过PersistentVolumeController的findProvisionablePlugin方法来进行寻找in-tree plugin，而find过程的关键在于通过PVC声明的storageClassName寻找对应的in-tree Plugin：
+
+```go
+// Find a plugin for the class
+if ctrl.csiMigratedPluginManager.IsMigrationEnabledForPlugin(class.Provisioner) {
+    // CSI migration scenario - do not depend on in-tree plugin
+    return nil, class, nil
+}
+plugin, err := ctrl.volumePluginMgr.FindProvisionablePluginByName(class.Provisioner)
+if err != nil {
+    if !strings.HasPrefix(class.Provisioner, "kubernetes.io/") {
+        // External provisioner is requested, do not report error
+        return nil, class, nil
+    }
+    return nil, class, err
+}
+return plugin, class, nil
+```
+
+在1.17之后，PVController会先判断是否属于in-tree plugin到CSI的迁移(migration)场景，如果属于，则会将in-tree的plugin迁移到CSI，关于migration的产生背景，可以看下这篇介绍：https://kubernetes.io/blog/2019/12/09/kubernetes-1-17-feature-csi-migration-beta/
+
+简单来说，为了支持Plugin机制的广泛使用，K8S社区还是越来越倾向于减少in-tree的代码，而通过Plugin的机制来进行扩展，原先in-tree的Plugin也被通过migration的机制，逐渐往CSI上迁，从中也能看出K8S社区对扩展性的考量，未来K8S极有可能成为Plugin的“媒介”系统（目前还未采用Plugin机制的，仅有Kube-scheduler，而随着K8S社区的不断演进，kube-scheduler的默认调度器也会和CSI、CNI一样，支持自定义调度插件）。
+
+在判断
 
 
 
