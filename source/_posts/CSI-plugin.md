@@ -192,6 +192,8 @@ if smallestVolume != nil {
 
 以上是PV和PVC的调度绑定流程。
 
+#### Dynamic Provisioning
+
 这个过程在PersistentVolumeController中完成，而当Pod在实际使用Volume前，需要通过Attach以及Mount流程后，才能真正进行使用。
 
 而实际的应用场景则是，在环境中可能没有提前创建好可供“bound”的PV，这时候**Dynamic Provisioning**就派上用场了。
@@ -252,24 +254,60 @@ if err != nil {
 return plugin, class, nil
 ```
 
-在1.17之后，PVController会先判断是否属于in-tree plugin到CSI的迁移(migration)场景，如果属于，则会将in-tree的plugin迁移到CSI，关于migration的产生背景，可以看下这篇介绍：https://kubernetes.io/blog/2019/12/09/kubernetes-1-17-feature-csi-migration-beta/
+在1.14之后，PVController会先判断是否属于in-tree plugin到CSI的迁移(migration)场景，如果属于，则会将in-tree的plugin迁移到CSI，关于migration的产生背景，可以看下这篇介绍：https://kubernetes.io/blog/2019/12/09/kubernetes-1-17-feature-csi-migration-beta/
 
-简单来说，为了支持Plugin机制的广泛使用，K8S社区还是越来越倾向于减少in-tree的代码，而通过Plugin的机制来进行扩展，原先in-tree的Plugin也被通过migration的机制，逐渐往CSI上迁，从中也能看出K8S社区对扩展性的考量，未来K8S极有可能成为Plugin的“媒介”系统（目前还未采用Plugin机制的，仅有Kube-scheduler，而随着K8S社区的不断演进，kube-scheduler的默认调度器也会和CSI、CNI一样，支持自定义调度插件）。
+简单来说，为了支持Plugin机制的广泛使用，K8S社区越来越倾向于减少in-tree的代码，而通过Plugin的机制来进行扩展，原先in-tree的Plugin也被通过migration的机制，逐渐往CSI上迁，从中也能看出K8S社区对扩展性的考量，未来K8S极有可能成为Plugin的“媒介”系统（目前还未采用Plugin机制的，仅有kube-scheduler，而随着K8S社区的不断演进，kube-scheduler的默认调度器也会和CSI、CNI一样，支持自定义调度插件）。
 
-在判断
+继续往下分析，PVController会通过scheduleOperation来传入PV的Operation方法作为闭包，scheduleOperation的作用主要是通过grm（goroutinemap）的读写锁来判定，是否有Operation已经在运行中，运行中的作业会被预先加入goroutinemap中，用以判断。
 
-
-
-#### Attach
-
-
-
-#### Mount
-
-
-
-### CSI工作原理
+```go
+// goroutinemap
+type goRoutineMap struct {
+	operations                map[string]operation
+	exponentialBackOffOnError bool
+	cond                      *sync.Cond
+	lock                      sync.RWMutex
+}
+```
 
 
 
-### 尝试编写CSI
+#### Attach & Mount
+
+在实际挂载时，通过ADController调用CSI的Attach操作，并在kubelet中调用Mount操作，完成存储卷和Pod的挂载过程。
+
+在ADController中，首先会构建出PV对应的VolumeSpec，
+
+```go
+// NewSpecFromPersistentVolume creates an Spec from an v1.PersistentVolume
+func NewSpecFromPersistentVolume(pv *v1.PersistentVolume, readOnly bool) *Spec {
+	return &Spec{
+		PersistentVolume: pv,
+		ReadOnly:         readOnly,
+	}
+}
+```
+
+之后根据VolumeSpec寻找到plugin， 通过调用operation_executor，完成Attach操作。
+
+```go
+func (oe *operationExecutor) AttachVolume(
+	volumeToAttach VolumeToAttach,
+	actualStateOfWorld ActualStateOfWorldAttacherUpdater) error {
+	generatedOperations :=
+		oe.operationGenerator.GenerateAttachVolumeFunc(volumeToAttach, actualStateOfWorld)
+
+	if util.IsMultiAttachAllowed(volumeToAttach.VolumeSpec) {
+		return oe.pendingOperations.Run(
+			volumeToAttach.VolumeName, "" /* podName */, volumeToAttach.NodeName, generatedOperations)
+	}
+
+	return oe.pendingOperations.Run(
+		volumeToAttach.VolumeName, "" /* podName */, "" /* nodeName */, generatedOperations)
+}
+```
+
+而Mount操作则在kubelet中进行，在kubelet中会生成VolumeManager对象。
+
+关于VolumeManager的处理逻辑会在kubelet的详细介绍文章中介绍。
+

@@ -69,7 +69,7 @@
       
         <li class="list-item">
           
-            <a href="/" class="item-link">Home</a>
+            <a href="/" class="item-link active">Home</a>
           
         </li>
       
@@ -108,7 +108,7 @@
         
           <li class="menu-item">
             
-              <a href="/" class="menu-link">Home</a>
+              <a href="/" class="menu-link mobile-active">Home</a>
             
           </li>
         
@@ -141,93 +141,56 @@
   </div>
 </header>
 
-    <div id="article-banner">
-  <h2>Archives</h2>
-  <p class="post-date">文章归档</p>
+    <main class="app-body">
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/">文件IO调用</a>
+      </h2>
+      <p class="article-date">April 9, 2021</p>
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Linux启动过程刨析</a>
+      </h2>
+      <p class="article-date">April 8, 2021</p>
+      
+        
+  <a href="/tags#system" >
+    <span class="tag-code">system</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          <p>Linux启动过程主要包含boot和startup两个阶段。</p>
+        
+      </div>
+      <a class="more" href="/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Read more</a>
+    </article>
+  
+
+  
+    <div class="guide-pager">
+  
+    <a href="/"><span class="page-arrow">← </span>Prev</a>
+  
+  
+    <a class="unvisible" href="/">Next <span class="page-arrow">→</span></a>
+  
 </div>
-<main class="app-body" id="archives">
-  
-  
-  
-    <section class="time-section">
-  <h1 class="section-year">
-    2021
-  </h1>
-  <div class="section-list">
-    
-    
-      <div class="section-list-item">
-        <a href="/2021/06/23/kubelet/" class="archive-title">kubelet</a>
-        <p class="archive-date">06-23</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/06/15/garbage-collector-controller/" class="archive-title">garbage-collector-controller</a>
-        <p class="archive-date">06-15</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/20/CSI-plugin/" class="archive-title">CSI plugin</a>
-        <p class="archive-date">04-20</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/Cloud-Devops/" class="archive-title">Cloud Devops</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/" class="archive-title">容器文件系统</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/linux-container/" class="archive-title">linux container</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/cgroup/" class="archive-title">cgroup</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/" class="archive-title">容器网络</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/K8S-Operator/" class="archive-title">K8S Operator</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/%E5%AE%B9%E5%99%A8%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/" class="archive-title">容器问题总结</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/09/%E6%96%87%E4%BB%B6IO%E8%B0%83%E7%94%A8/" class="archive-title">文件IO调用</a>
-        <p class="archive-date">04-09</p>
-      </div>
-    
-      <div class="section-list-item">
-        <a href="/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" class="archive-title">Linux启动过程刨析</a>
-        <p class="archive-date">04-08</p>
-      </div>
-    
-  </div>
-</section>
   
 </main>
 
-<script>
-  (function () {
-    var url = 'http://example.com/archives/index.html';
-    $('#article-banner').geopattern(url);
-    $('.header').removeClass('fixed-header');
-  })();
-</script>
+
     <div class="scroll-top">
   <span class="arrow-icon"></span>
 </div>
