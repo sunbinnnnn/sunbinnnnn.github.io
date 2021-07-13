@@ -3,8 +3,8 @@
   <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
-  <meta name="description" content="Neil&#39;s blog">
-  <meta name="keyword" content="k8s">
+  <meta name="description" content="NeilSun&#39;s blog">
+  <meta name="keyword" content="hexo-theme, vuejs">
   
     <link rel="shortcut icon" type="image/ico" href="https://avatars.githubusercontent.com/u/18653098?s=400&amp;u=8b3b494cfa224eb388a933aa9af8ac5e5b65b3f8&amp;v=4"/>
   
@@ -52,12 +52,16 @@
 
 
   
+  
+    
+<script src="/js/local-search.js"></script>
+
+
 <meta name="generator" content="Hexo 5.4.0"><link rel="alternate" href="/atom.xml" title="Neil's blog" type="application/atom+xml">
 </head>
 <div class="wechat-share">
   <img src="/css/images/logo.png" />
 </div>
-
   <body>
     <header class="header fixed-header">
   <div class="header-container">
@@ -96,6 +100,13 @@
             <a href="/about/" class="item-link">About</a>
           
         </li>
+      
+      
+        <li class="menu-item menu-item-search right-list">
+    <a role="button" class="popup-trigger">
+        <i class="fa fa-search fa-fw"></i>
+    </a>
+</li>
       
     </ul>
     <div class="menu">
@@ -138,6 +149,30 @@
         
       </ul>
     </div>
+    
+      <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+            <span class="search-icon">
+                <i class="fa fa-search"></i>
+            </span>
+            <div class="search-input-container">
+                <input autocomplete="off" autocapitalize="off"
+                    placeholder="Please enter your keyword(s) to search." spellcheck="false"
+                    type="search" class="search-input">
+            </div>
+            <span class="popup-btn-close">
+                <i class="fa fa-times-circle"></i>
+            </span>
+        </div>
+        <div id="search-result">
+            <div id="no-result">
+                <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    
   </div>
 </header>
 
@@ -302,7 +337,7 @@
 
     // error image
     $(".markdown-content img").on('error', function() {
-      $(this).attr('src', 'http://file.muyutech.com/error-img.png')
+      $(this).attr('src', '/css/images/error_icon.png')
       $(this).css({
         'cursor': 'default'
       })
@@ -311,7 +346,7 @@
     // zoom image
     $(".markdown-content img").on('click', function() {
       var src = $(this).attr('src')
-      if (src !== 'http://file.muyutech.com/error-img.png') {
+      if (src !== '/css/images/error_icon.png') {
         var imageW = $(this).width()
         var imageH = $(this).height()
 
@@ -378,6 +413,7 @@
       if (hasLine === 'false') {
         figure.find('.gutter').hide();
       }
+      hljs.configure({useBR: true});
       var lang = figure.attr('class').split(' ')[1] || 'code';
       var codeHtml = $(this).html();
       var codeTag = document.createElement('code');
@@ -393,6 +429,7 @@
 
 
 <script src="/js/script.js"></script>
+
 
   </body>
 </html>
