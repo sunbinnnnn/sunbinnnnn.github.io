@@ -592,6 +592,7 @@ docker pull rancher/mirrored-flannelcni-flannel-cni-plugin:v1.0.1
 2.打包镜像
 
 ```
+ IMAGES_LIST=($(docker  images   | sed  '1d' | awk  '{print $1":"$2}'))
 docker save ${IMAGES_LIST[*]}  -o  all-images.tar.gz
 ```
 
