@@ -159,13 +159,33 @@
       
       <div class="article-summary">
         
-          一.环境准备1.基础参数配置（所有节点）
-设置主机名：
-hostnamectl set-hostname node1
-生成密钥、免密登陆：
-ssh-keygen，ssh-copy-id 
-关闭防火墙：
-12systemctl stop firewalldsystemctl disable f ...
+          一.环境准备
+
+
+IP
+主机名/类型
+ApiServer端口号
+
+
+
+192.168.122.213
+knode1
+6443
+
+
+192.168.122.74
+knode2
+6443
+
+
+192.168.122.18
+knode3
+6443
+
+
+192.168.122.150
+VIP
+744 ...
         
       </div>
       <a class="more" href="/2022/04/15/kubeadm%E9%83%A8%E7%BD%B2%E7%94%9F%E4%BA%A7k8s/">Read more</a>

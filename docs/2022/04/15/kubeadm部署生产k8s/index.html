@@ -153,7 +153,36 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"><h1 id="一-环境准备"><a href="#一-环境准备" class="headerlink" title="一.环境准备"></a>一.环境准备</h1><p>1.基础参数配置（所有节点）</p>
+    <section class="markdown-content"><h1 id="一-环境准备"><a href="#一-环境准备" class="headerlink" title="一.环境准备"></a>一.环境准备</h1><table>
+<thead>
+<tr>
+<th>IP</th>
+<th>主机名/类型</th>
+<th>ApiServer端口号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>192.168.122.213</td>
+<td>knode1</td>
+<td>6443</td>
+</tr>
+<tr>
+<td>192.168.122.74</td>
+<td>knode2</td>
+<td>6443</td>
+</tr>
+<tr>
+<td>192.168.122.18</td>
+<td>knode3</td>
+<td>6443</td>
+</tr>
+<tr>
+<td>192.168.122.150</td>
+<td>VIP</td>
+<td>7443</td>
+</tr>
+</tbody></table>
+<p>1.基础参数配置（所有节点）</p>
 <p>设置主机名：</p>
 <p><code>hostnamectl set-hostname node1</code></p>
 <p>生成密钥、免密登陆：</p>
