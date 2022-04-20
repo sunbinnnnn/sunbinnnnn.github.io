@@ -55,7 +55,7 @@ sudo sysctl --system
 sudo yum remove docker                   docker-client                   docker-client-latest                   docker-common                   docker-latest                   docker-latest-logrotate                   docker-logrotate                   docker-engine
 sudo yum install -y yum-utils
 sudo yum-config-manager     --add-repo     https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install docker-ce docker-ce-cli containerd.io
+sudo yum install -y docker-ce docker-ce-cli containerd.io
 sudo mkdir /etc/docker
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
@@ -104,13 +104,21 @@ sudo systemctl enable --now kubelet
 
 ```
 APISERVER_VIP=192.168.122.150
+
 APISERVER_DEST_PORT=7443
+
 APISERVER_SRC_PORT=6443
+
 HOST1_ID=knode1
+
 HOST1_ADDRESS=192.168.122.213
+
 HOST2_ID=knode2
+
 HOST2_ADDRESS=192.168.122.74
+
 HOST3_ID=knode3
+
 HOST3_ADDRESS=192.168.122.18
 ```
 
@@ -368,7 +376,7 @@ data:
     {
       "Network": "10.244.0.0/16",
       "Backend": {
-        "Type": "host-gw"
+        "Type": "vxlan"
       }
     }
 ---
