@@ -237,13 +237,13 @@ systemctl enable keepalived --now
 ```
 ########### init first control ###########
 
-sudo kubeadm init --control-plane-endpoint "${APISERVER_VIP}:${APISERVER_DEST_PORT}" --upload-certs  --pod-network-cidr=10.244.0.0/16
+sudo kubeadm init --control-plane-endpoint "${APISERVER_VIP}:${APISERVER_DEST_PORT}" --upload-certs  --pod-network-cidr=10.244.0.0/16 --kubernetes-version 1.23.5
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-5.安装flannel网络插件（hostGateway）（第一个控制节点）
+5.安装flannel网络插件（vxlan）（第一个控制节点）
 
 ```
 sudo cat <<EOF | sudo tee /root/flannel.yaml
@@ -535,11 +535,19 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
+加入额外node节点（在需要加入的额外node节点上执行）：
+
+```
+sudo kubeadm join ${FIRSTCONTROLNODE}:6443 --token ${TOKEN} --discovery-token-ca-cert-hash sha256:${DISCOVERYTOKEHASH}
+```
+
+
+
 
 
 # 三.验证
 
-在任意节点执行：
+在任意控制节点执行：
 
 ```
 [root@knode1 ~]# kubectl get pod -n kube-system  -owide
@@ -600,7 +608,7 @@ docker pull rancher/mirrored-flannelcni-flannel-cni-plugin:v1.0.1
 2.打包镜像
 
 ```
- IMAGES_LIST=($(docker  images   | sed  '1d' | awk  '{print $1":"$2}'))
+IMAGES_LIST=($(docker  images   | sed  '1d' | awk  '{print $1":"$2}'))
 docker save ${IMAGES_LIST[*]}  -o  all-images.tar.gz
 ```
 
@@ -609,8 +617,3 @@ docker save ${IMAGES_LIST[*]}  -o  all-images.tar.gz
 ```
 docker load < all-images.tar.gz
 ```
-
-
-
-
-

@@ -177,6 +177,9 @@
 <td>计算、存储节点</td>
 </tr>
 </tbody></table>
+<blockquote>
+<p>文章中引用的chart包是经过改造的，如需要，请联系笔者</p>
+</blockquote>
 <h1 id="一-helm准备"><a href="#一-helm准备" class="headerlink" title="一.helm准备"></a>一.helm准备</h1><p>1.将helm二进制复制到<code>/usr/bin</code>下</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cp helm &#x2F;usr&#x2F;bin&#x2F;helm</span><br><span class="line">chmod +x &#x2F;usr&#x2F;bin&#x2F;helm</span><br></pre></td></tr></table></figure>
 
@@ -189,20 +192,57 @@
 
 
 <h1 id="二-安装rook-ceph"><a href="#二-安装rook-ceph" class="headerlink" title="二.安装rook-ceph"></a>二.安装rook-ceph</h1><p>1.安装rook-ceph-operator</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install --create-namespace --namespace rook-ceph rook-ceph .&#x2F;rook-ceph-0.0.1.tgz  --set image.tag&#x3D;v1.8.8</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install --create-namespace --namespace rook-ceph rook-ceph .&#x2F;charts&#x2F;rook-ceph-0.0.1.tgz  --set image.tag&#x3D;v1.8.8</span><br></pre></td></tr></table></figure>
 
 <p>2.创建ceph cluster、storageClass</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install --create-namespace --namespace rook-ceph rook-ceph-cluster .&#x2F;rook-ceph-cluster-0.0.1.tgz --set cephClusterSpec.dashboard.enabled&#x3D;false</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install --create-namespace --namespace rook-ceph rook-ceph-cluster .&#x2F;charts&#x2F;rook-ceph-cluster-0.0.1.tgz --set cephClusterSpec.dashboard.enabled&#x3D;false</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>删除时，需要先执行<code>kubectl -n rook-ceph patch cephcluster rook-ceph --type merge -p &#39;&#123;&quot;spec&quot;:&#123;&quot;cleanupPolicy&quot;:&#123;&quot;confirmation&quot;:&quot;yes-really-destroy-data&quot;&#125;&#125;&#125;&#39;</code></p>
 </blockquote>
 <p>3.等待集群创建完成</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl  wait --for&#x3D;condition&#x3D;Ready -n rook-ceph cephcluster rook-ceph</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl  wait --for&#x3D;condition&#x3D;Ready -n rook-ceph cephcluster rook-ceph --timeout&#x3D;500s</span><br></pre></td></tr></table></figure>
 
 
 
-<h1 id="三-安装Registry、ChartMuseum"><a href="#三-安装Registry、ChartMuseum" class="headerlink" title="三.安装Registry、ChartMuseum"></a>三.安装Registry、ChartMuseum</h1></section>
+<h1 id="三-安装Registry、ChartMuseum"><a href="#三-安装Registry、ChartMuseum" class="headerlink" title="三.安装Registry、ChartMuseum"></a>三.安装Registry、ChartMuseum</h1><p>1.安装并配置docker-registry</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm install docker-registry --create-namespace --namespace registry .&#x2F;charts&#x2F;docker-registry-2.1.0.tgz --set persistence.size&#x3D;60Gi</span><br></pre></td></tr></table></figure>
+
+<p>2.设置私有仓库和设置dns地址（<strong>需要在所有节点执行</strong>）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># replace nameserver to kubedns, every nodes should do below</span><br><span class="line">cat &lt;&lt;EOF | sudo tee &#x2F;etc&#x2F;docker&#x2F;daemon.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver&#x3D;systemd&quot;],</span><br><span class="line">  &quot;log-driver&quot;: &quot;json-file&quot;,</span><br><span class="line">  &quot;log-opts&quot;: &#123;</span><br><span class="line">    &quot;max-size&quot;: &quot;100m&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;storage-driver&quot;: &quot;overlay2&quot;,</span><br><span class="line">  &quot;insecure-registries&quot; : [&quot;docker-registry.registry.svc.cluster.local&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br><span class="line"></span><br><span class="line">NAMESERVER&#x3D;kubectl get svc -n kube-system|awk &#39;&#123; print $3 &#125;&#39;|grep -v IP</span><br><span class="line">echo &quot;nameserver $NAMESERVER&quot; &gt; &#x2F;etc&#x2F;resolv.conf</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>测试：</p>
+<p>docker tag rook/ceph:v1.8.8 docker-registry.registry.svc.cluster.local/ceph:v1.8.8</p>
+<p>docker push docker-registry.registry.svc.cluster.local/ceph:v1.8.8</p>
+</blockquote>
+<p>3.导入镜像到registry</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 修改Kubelet ImageGC配置，防止kubelet删除节点镜像</span><br><span class="line">echo &quot;imageGCHighThresholdPercent: 100&quot; &gt;&gt; &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;config.yaml</span><br><span class="line">systemctl restart kubelet</span><br><span class="line"></span><br><span class="line">docker load -q &lt; images&#x2F;components&#x2F;all_components_images.tar.gz</span><br><span class="line">docker images | grep docker-registry.registry.svc.cluster.local | awk &#39;&#123;print &quot;docker push -q &quot;$1&quot;:&quot;$2&#125;&#39;|sh</span><br><span class="line"></span><br><span class="line">sed -i &#39;&#x2F;imageGCHighThresholdPercent&#x2F;d&#39;  &#x2F;var&#x2F;lib&#x2F;kubelet&#x2F;config.yaml</span><br><span class="line">systemctl restart kubelet</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>4.安装并配置chartmuseum</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">helm install chartmuseum --create-namespace --namespace registry .&#x2F;charts&#x2F;chartmuseum-3.7.0.tgz</span><br><span class="line">helm repo add chartmuseum http:&#x2F;&#x2F;chartmuseum.registry.svc.cluster.local:8080&#x2F;</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+
+<p>5.安装并配置openstackclient</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">sudo -H -E pip3 install  --no-index --find-links&#x3D;.&#x2F;pip3_pack&#x2F; cmd2 python-openstackclient python-heatclient --ignore-installed</span><br><span class="line"></span><br><span class="line">sudo -H mkdir -p &#x2F;etc&#x2F;openstack</span><br><span class="line">sudo -H chown -R $(id -un): &#x2F;etc&#x2F;openstack</span><br><span class="line">FEATURE_GATE&#x3D;&quot;tls&quot;; if [[ $&#123;FEATURE_GATES&#x2F;&#x2F;,&#x2F; &#125; &#x3D;~ (^|[[:space:]])$&#123;FEATURE_GATE&#125;($|[[:space:]]) ]]; then</span><br><span class="line">  tee &#x2F;etc&#x2F;openstack&#x2F;clouds.yaml &lt;&lt; EOF</span><br><span class="line">  clouds:</span><br><span class="line">    openstack_helm:</span><br><span class="line">      region_name: RegionOne</span><br><span class="line">      identity_api_version: 3</span><br><span class="line">      cacert: &#x2F;etc&#x2F;openstack-helm&#x2F;certs&#x2F;ca&#x2F;ca.pem</span><br><span class="line">      auth:</span><br><span class="line">        username: &#39;admin&#39;</span><br><span class="line">        password: &#39;password&#39;</span><br><span class="line">        project_name: &#39;admin&#39;</span><br><span class="line">        project_domain_name: &#39;default&#39;</span><br><span class="line">        user_domain_name: &#39;default&#39;</span><br><span class="line">        auth_url: &#39;https:&#x2F;&#x2F;keystone.openstack.svc.cluster.local&#x2F;v3&#39;</span><br><span class="line">EOF</span><br><span class="line">else</span><br><span class="line">  tee &#x2F;etc&#x2F;openstack&#x2F;clouds.yaml &lt;&lt; EOF</span><br><span class="line">  clouds:</span><br><span class="line">    openstack_helm:</span><br><span class="line">      region_name: RegionOne</span><br><span class="line">      identity_api_version: 3</span><br><span class="line">      auth:</span><br><span class="line">        username: &#39;admin&#39;</span><br><span class="line">        password: &#39;password&#39;</span><br><span class="line">        project_name: &#39;admin&#39;</span><br><span class="line">        project_domain_name: &#39;default&#39;</span><br><span class="line">        user_domain_name: &#39;default&#39;</span><br><span class="line">        auth_url: &#39;http:&#x2F;&#x2F;keystone.openstack.svc.cluster.local&#x2F;v3&#39;</span><br><span class="line">EOF</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p>6.导入charts</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for i in &#96;ls .&#x2F;charts&#96;;do curl --data-binary &quot;@.&#x2F;charts&#x2F;$i&quot; http:&#x2F;&#x2F;chartmuseum.registry.svc.cluster.local:8080&#x2F;api&#x2F;charts;done</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="三-部署、配置平台中间件"><a href="#三-部署、配置平台中间件" class="headerlink" title="三.部署、配置平台中间件"></a>三.部署、配置平台中间件</h1><p>1.安装ingress-controller</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">helm install nginx-ingress-controller --namespace kube-system chartmuseum&#x2F;nginx-ingress</span><br><span class="line"></span><br><span class="line"># 等待pod启动</span><br><span class="line">kubectl  wait --for&#x3D;condition&#x3D;Available -n kube-system deployment&#x2F;nginx-ingress-controller-nginx-ingress --timeout&#x3D;300s</span><br></pre></td></tr></table></figure>
+
+<p>2.部署mariadb</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">helm install mariadb --namespace openstack chartmuseum&#x2F;mariadb --set volume.enabled&#x3D;true --set volume.class_name&#x3D;ceph-block --set volume.size&#x3D;10Gi</span><br><span class="line"></span><br><span class="line"># 等待3个pod启动</span><br><span class="line">kubectl  wait --for&#x3D;condition&#x3D;Ready -n openstack pods&#x2F;mariadb-server-2</span><br><span class="line">kubectl  wait --for&#x3D;condition&#x3D;Ready -n openstack pods&#x2F;mariadb-server-1</span><br><span class="line">kubectl  wait --for&#x3D;condition&#x3D;Ready -n openstack pods&#x2F;mariadb-server-0</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Pod一直无法启动？</p>
+<p>一般情况下是mariaDB集群时间采样与实际时间不符导致，需要检查以下两点：</p>
+<p>1.ntp时间是否同步</p>
+<p>2.是否之前部署过后进行了helm delete，如果是，需要手动删除openstack namespace下，mariaDB相关的configmap和pvc，删除后重新部署即可</p>
+</blockquote>
+</section>
     <!-- Tags START -->
     
     <!-- Tags END -->
@@ -239,7 +279,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%B8%80-helm%E5%87%86%E5%A4%87"><span class="toc-nav-text">一.helm准备</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%BA%8C-%E5%AE%89%E8%A3%85rook-ceph"><span class="toc-nav-text">二.安装rook-ceph</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%B8%89-%E5%AE%89%E8%A3%85Registry%E3%80%81ChartMuseum"><span class="toc-nav-text">三.安装Registry、ChartMuseum</span></a></li></ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%B8%80-helm%E5%87%86%E5%A4%87"><span class="toc-nav-text">一.helm准备</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%BA%8C-%E5%AE%89%E8%A3%85rook-ceph"><span class="toc-nav-text">二.安装rook-ceph</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%B8%89-%E5%AE%89%E8%A3%85Registry%E3%80%81ChartMuseum"><span class="toc-nav-text">三.安装Registry、ChartMuseum</span></a></li><li class="toc-nav-item toc-nav-level-1"><a class="toc-nav-link" href="#%E4%B8%89-%E9%83%A8%E7%BD%B2%E3%80%81%E9%85%8D%E7%BD%AE%E5%B9%B3%E5%8F%B0%E4%B8%AD%E9%97%B4%E4%BB%B6"><span class="toc-nav-text">三.部署、配置平台中间件</span></a></li></ol>
     
   </div>
 </aside>
