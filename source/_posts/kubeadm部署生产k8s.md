@@ -38,6 +38,7 @@ systemctl disable firewalld
 
 ```bash
 sudo modprobe br_netfilter
+
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 br_netfilter
 EOF
@@ -46,6 +47,7 @@ cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
+
 sudo sysctl --system
 ```
 
@@ -122,7 +124,7 @@ HOST3_ID=knode3
 HOST3_ADDRESS=192.168.122.18
 ```
 
-3.为kube-api配置负载均衡（keepalive+haproxy）（所有节点）
+3.为kube-api配置负载均衡（keepalive+haproxy）（所有控制节点）
 
 keepalive& haproxy配置：
 
@@ -246,7 +248,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 5.安装flannel网络插件（vxlan）（第一个控制节点）
 
 ```
-sudo cat <<EOF | sudo tee /root/flannel.yaml
+sudo cat <<EOF | sudo tee /tmp/flannel.yaml
 ---
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
@@ -496,7 +498,7 @@ spec:
           path: /run/xtables.lock
           type: FileOrCreate
 EOF
-kubectl  apply -f flannel.yaml
+kubectl  apply -f /tmp/flannel.yaml
 ```
 
 6.添加额外的控制节点
