@@ -22,7 +22,7 @@ tags:
 1.将helm二进制复制到`/usr/bin`下
 
 ```
-cp helm /usr/bin/helm
+cp binary/helm /usr/bin/helm
 chmod +x /usr/bin/helm
 ```
 
@@ -34,12 +34,12 @@ kubectl taint nodes knode2 node-role.kubernetes.io/master:NoSchedule-
 kubectl taint nodes knode3 node-role.kubernetes.io/master:NoSchedule-
 ```
 
-3.为节点添加label（3控制同时作为控制节点和计算节点，单独的node4作为单独计算节点，所有节点默认都是存储节点）
+3.为节点添加label（3控制同时作为控制节点和计算节点，单独的node4作为单独计算节点，所有节点默认都是存储节点，控制节点作为进出口流量节点）
 
 ```
-kubectl label nodes knode1 ceph-control-plane=enabled openstack-control-plane=enabled  openvswitch=enabled openstack-compute-node=enabled
-kubectl label nodes knode2 ceph-control-plane=enabled openstack-control-plane=enabled  openvswitch=enabled openstack-compute-node=enabled
-kubectl label nodes knode3 ceph-control-plane=enabled openstack-control-plane=enabled  openvswitch=enabled openstack-compute-node=enabled
+kubectl label nodes knode1 ceph-control-plane=enabled openstack-control-plane=enabled  openvswitch=enabled openstack-compute-node=enabled ingress-node=enabled
+kubectl label nodes knode2 ceph-control-plane=enabled openstack-control-plane=enabled  openvswitch=enabled openstack-compute-node=enabled ingress-node=enabled
+kubectl label nodes knode3 ceph-control-plane=enabled openstack-control-plane=enabled  openvswitch=enabled openstack-compute-node=enabled ingress-node=enabled
 kubectl label nodes knode4 openstack-compute-node=enabled openvswitch=enabled 
 ```
 
@@ -73,7 +73,7 @@ kubectl  wait --for=condition=Ready -n rook-ceph cephcluster rook-ceph --timeout
 sleep 180
 
 kubectl get pod -n rook-ceph # 确认所有pod都处于Running或Complete状态，确保4个osd成功创建（集群Ready后，OSD不一定完全启动），创建成功后才能进行下一步
-# 查看ceph集群状态
+# 查看ceph集群状态,HEALTH_WARN或HEALTH_OK均可
 kubectl exec -it -n rook-ceph `kubectl  get pod -n rook-ceph -owide|grep tools|awk '{ print $1 }'` -- ceph -s
 ```
 
@@ -154,6 +154,7 @@ helm repo update
 5.安装并配置openstackclient
 
 ```
+# 在所有控制节点安装
 yum install -y python3
 mkdir -p /tmp/pip_packs/
 tar -zxf ./pip_packs/openstackclient_pip_packs.tar.gz -C /tmp/pip_packs/
@@ -209,10 +210,10 @@ helm repo update
 1.安装ingress-controller
 
 ```
-helm install nginx-ingress-controller --namespace kube-system chartmuseum/nginx-ingress
-
+helm install ingress-controller --namespace kube-system chartmuseum/ingress-nginx
 # 等待pod启动
-kubectl  wait --for=condition=Available -n kube-system deployment/nginx-ingress-controller-nginx-ingress --timeout=300s
+[root@knode1 ~]# kubectl  get ds -n kube-system|grep ingress-controller-ingress-nginx-controller
+ingress-controller-ingress-nginx-controller   4         4         4       4            4           kubernetes.io/os=linux   37m
 ```
 
 2.部署mariadb
@@ -289,21 +290,7 @@ openstack image list
 CEPHKEY=`kubectl get secret -n rook-ceph rook-ceph-admin-keyring -ojsonpath='{.data.keyring}'|base64 -d|grep key|awk '{ print $3 }'`
 MON_LIST=($(kubectl  get svc -n rook-ceph|grep mon|awk '{ print $1 }'))
 cat << EOF | sudo tee /tmp/cinder_ceph.yaml
-# Note: This yaml file serves as an example for overriding the manifest
-# to enable additional externally managed Ceph Cinder backend.
-# libvirt/values_overrides/cinder-external-ceph-backend.yaml in repo
-# openstack-helm-infra is also needed for the attachment of ceph volumes.
 ---
-ceph_client:
-  enable_external_ceph_backend: True
-  external_ceph:
-    rbd_user: admin
-    rbd_user_keyring: $CEPHKEY
-    conf:
-      global:
-        mon_host: "${MON_LIST[0]}.rook-ceph.svc.cluster.local:6789,${MON_LIST[1]}.rook-ceph.svc.cluster.local:6789,${MON_LIST[2]}.rook-ceph.svc.cluster.local:6789"
-      client.admin:
-        keyring: /etc/ceph/ceph.client.admin.keyring
 conf:
   ceph:
     admin_keyring: $CEPHKEY
@@ -315,8 +302,7 @@ conf:
     rook-ceph:
       volume_driver: cinder.volume.drivers.rbd.RBDDriver
       volume_backend_name: rook-ceph
-      rbd_pool: cinder.rook
-      rbd_ceph_conf: "/etc/ceph/external-ceph.conf"
+      rbd_pool: cinder.volumes
       rbd_flatten_volume_from_snapshot: False
       report_discard_supported: True
       rbd_max_clone_depth: 5
@@ -327,15 +313,6 @@ conf:
       image_volume_cache_enabled: True
       image_volume_cache_max_size_gb: 200
       image_volume_cache_max_count: 50
-  backup:
-    external_ceph_rbd:
-      enabled: true
-      admin_keyring: $CEPHKEY
-      conf:
-        global:
-          mon_host: "${MON_LIST[0]}.rook-ceph.svc.cluster.local:6789,${MON_LIST[1]}.rook-ceph.svc.cluster.local:6789,${MON_LIST[2]}.rook-ceph.svc.cluster.local:6789"
-        client.admin:
-          keyring: /etc/ceph/ceph.client.admin.keyring
 ...
 
 EOF
@@ -353,6 +330,11 @@ data:
 
     [client.admin]
     keyring = /etc/ceph/ceph.client.admin.keyring
+    caps mds = "allow *"
+    caps mon = "allow *"
+    caps osd = "allow *"
+    caps mgr = "allow *"
+
 EOF
 kubectl apply -f /tmp/ceph-ceph.yaml
 
@@ -372,6 +354,7 @@ openstack volume type list --default
 ```
 helm upgrade --install openvswitch chartmuseum/openvswitch \
   --namespace=openstack
+sleep 180
 # 验证, 查看daemonSet正常启动
 [root@master1 ~]# kubectl  get ds -n openstack
 NAME                   DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR         AGE
@@ -384,12 +367,6 @@ openvswitch-vswitchd   4         4         4       4            4           open
 ```
 CEPHKEY=`kubectl get secret -n rook-ceph rook-ceph-admin-keyring -ojsonpath='{.data.keyring}'|base64 -d|grep key|awk '{ print $3 }'`
 cat << EOF | sudo tee /tmp/libvirt_ceph.yaml
-# Note: This yaml file serves as an example for overriding the manifest
-# to enable additional externally managed Ceph Cinder backend. When additional
-# externally managed Ceph Cinder backend is provisioned as shown in
-# cinder/values_overrides/external-ceph-backend.yaml of repo openstack-helm,
-# below override is needed to store the secret key of the cinder user in
-# libvirt.
 ---
 conf:
   ceph:
@@ -399,11 +376,6 @@ conf:
       user: "admin"
       keyring: $CEPHKEY
       secret_uuid: 3f0133e4-8384-4743-9473-fecacc095c74
-      external_ceph:
-        enabled: true
-        user: admin
-        secret_uuid: 3f0133e4-8384-4743-9473-fecacc095c74
-        user_secret_name: cinder-volume-external-rbd-keyring
 ...
 
 EOF
@@ -423,12 +395,17 @@ helm upgrade --install libvirt chartmuseum/libvirt \
 
 # 计算组件（Compute Kit）安装过程会比较久（大约20~40分钟），可以通过循环检测判定安装状态
 CEPHKEY=`kubectl get secret -n rook-ceph rook-ceph-admin-keyring -ojsonpath='{.data.keyring}'|base64 -d|grep key|awk '{ print $3 }'`
+
+# VNCPROXY用到的VIP需要根据实际环境情况传入，脚本只在keepalive按照固定配置情况下生效！！
+APISERVER_VIP=`cat /etc/keepalived/keepalived.conf |grep -A 1 virtual_ipaddress|grep -v virtual_ipaddress|awk '{print $1}'`
+
 cat << EOF | sudo tee /tmp/nova_ceph.yaml
 ---
 pod:
   replicas:
     osapi: 2
     conductor: 2
+    novncproxy: 3
 conf:
   ceph:
     enabled: true
@@ -450,6 +427,7 @@ if [ "x$(systemd-detect-virt)" == "xnone" ]; then
       --namespace=openstack \
       --values=/tmp/nova_ceph.yaml \
       --set bootstrap.wait_for_computes.enabled=true \
+      --set conf.nova.vnc.novncproxy_base_url="http://${APISERVER_VIP}/vnc_auto.html"
       --timeout 1800s
 else
   echo 'OSH is being deployed in virtualized environment, using qemu for nova'
@@ -459,6 +437,7 @@ else
       --set bootstrap.wait_for_computes.enabled=true \
       --set conf.nova.libvirt.virt_type=qemu \
       --set conf.nova.libvirt.cpu_mode=none \
+      --set conf.nova.vnc.novncproxy_base_url="http://${APISERVER_VIP}/vnc_auto.html" \
       --timeout 1800s
 fi
 
@@ -470,13 +449,16 @@ helm upgrade --install placement chartmuseum/placement \
 
 # ==================注意=======================
 PUBLIC_NET_NIC=eth0 # 设置public网络的桥接网卡
+# 指定物理网卡或桥接网络，本例中只有一张网卡，同时作为private和public，注意，一张网卡时不能指定为eth0，eth0被桥接后不带地址！！
+PRIVATE_NET_NIC=br-ex # 设置private业务网网卡
 GATEWAY=10.10.1.1 # 设置外部网关
 # ==================注意=======================
 
 tee /tmp/neutron.yaml << EOF
+custom_share_l3_gateway: "$GATEWAY"
 network:
   interface:
-    tunnel: docker0
+    tunnel: br-ex
 pod:
   replicas:
     server: 2
@@ -506,11 +488,14 @@ helm upgrade --install neutron chartmuseum/neutron \
     --namespace=openstack \
     --values=/tmp/neutron.yaml --timeout 1800s
 
-# 若public网卡为唯一网卡，neutron安装完成后会丢失默认路由，需要重新添加
-ip route |grep default ||  ip route add default via $GATEWAY dev br-ex
+sleep 180s
 
-# 等待所有pod启动完成，时间大约在20分钟以内
+kubectl get pod -n openstack |grep ovs
+
+
+# 等待所有pod启动完成
 kubectl get pod -n openstack |grep -v Running |grep -v Completed
+
 # 验证
 export OS_CLOUD=openstack_helm
 [root@knode1 ~]# openstack service list
@@ -564,6 +549,11 @@ export OS_CLOUD=openstack_helm
 |  8 | knode2              | QEMU            | 10.10.1.110 | up    |
 |  9 | knode4              | QEMU            | 10.10.1.130 | up    |
 +----+---------------------+-----------------+-------------+-------+
+
+
+# 在所有节点添加默认路由，避免重启后丢失
+ip route | grep default || ip route add default via $GATEWAY dev br-ex
+echo "ip route | grep default || ip route add default via $GATEWAY dev br-ex" >> /etc/rc.local
 ```
 
 7.安装heat
@@ -591,6 +581,8 @@ openstack --os-interface public orchestration service list
 ```
 helm upgrade --install horizon chartmuseum/horizon \
   --namespace=openstack
+# 检查pod启动
+kubectl  get pod -n openstack -owide|grep -v Run|grep -v Com
 ```
 
 
@@ -600,3 +592,5 @@ helm upgrade --install horizon chartmuseum/horizon \
 **1.步骤中wait方式等待可能会不准确，即pod未就绪，但deploy状态已就绪，需要确认pod处于Running后，再进行对应验证操作，否则会失败**
 
 **2.在placement安装过程中，nova相关组件可能会出现认证错误，在neutron完成安装并启动完成前可以忽视这些错误**
+
+**3.在db sync过程中，可能由于DB锁未释放等问题，产生死锁，但是db-sync 或init pod crash，可以忽略，等待后会自动恢复**

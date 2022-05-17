@@ -552,28 +552,12 @@ sudo kubeadm join ${FIRSTCONTROLNODE}:6443 --token ${TOKEN} --discovery-token-ca
 在任意控制节点执行：
 
 ```
-[root@knode1 ~]# kubectl get pod -n kube-system  -owide
-NAME                             READY   STATUS    RESTARTS        AGE     IP                NODE     NOMINATED NODE   READINESS GATES
-coredns-64897985d-9fhq7          1/1     Running   0               13m     10.244.0.2        knode1   <none>           <none>
-coredns-64897985d-v2pg4          1/1     Running   0               13m     10.244.0.3        knode1   <none>           <none>
-etcd-knode1                      1/1     Running   4               13m     192.168.122.213   knode1   <none>           <none>
-etcd-knode2                      1/1     Running   0               6m49s   192.168.122.74    knode2   <none>           <none>
-etcd-knode3                      1/1     Running   0               64s     192.168.122.18    knode3   <none>           <none>
-kube-apiserver-knode1            1/1     Running   4               13m     192.168.122.213   knode1   <none>           <none>
-kube-apiserver-knode2            1/1     Running   0               6m53s   192.168.122.74    knode2   <none>           <none>
-kube-apiserver-knode3            1/1     Running   0               67s     192.168.122.18    knode3   <none>           <none>
-kube-controller-manager-knode1   1/1     Running   4 (6m39s ago)   13m     192.168.122.213   knode1   <none>           <none>
-kube-controller-manager-knode2   1/1     Running   0               6m52s   192.168.122.74    knode2   <none>           <none>
-kube-controller-manager-knode3   1/1     Running   0               67s     192.168.122.18    knode3   <none>           <none>
-kube-flannel-ds-9x9ls            1/1     Running   0               68s     192.168.122.18    knode3   <none>           <none>
-kube-flannel-ds-vdzgk            1/1     Running   0               13m     192.168.122.213   knode1   <none>           <none>
-kube-flannel-ds-xdwcj            1/1     Running   1 (6m16s ago)   6m53s   192.168.122.74    knode2   <none>           <none>
-kube-proxy-4zqdz                 1/1     Running   0               68s     192.168.122.18    knode3   <none>           <none>
-kube-proxy-grwrp                 1/1     Running   0               13m     192.168.122.213   knode1   <none>           <none>
-kube-proxy-pxzvj                 1/1     Running   0               6m53s   192.168.122.74    knode2   <none>           <none>
-kube-scheduler-knode1            1/1     Running   5 (6m39s ago)   13m     192.168.122.213   knode1   <none>           <none>
-kube-scheduler-knode2            1/1     Running   0               6m52s   192.168.122.74    knode2   <none>           <none>
-kube-scheduler-knode3            1/1     Running   0               67s     192.168.122.18    knode3   <none>           <none>
+[root@knode1 ~]# kubectl  get nodes
+NAME     STATUS   ROLES                  AGE     VERSION
+knode1   Ready    control-plane,master   3m27s   v1.23.6
+knode2   Ready    control-plane,master   59s     v1.23.6
+knode3   Ready    control-plane,master   58s     v1.23.6
+knode4   Ready    <none>                 11s     v1.23.6
 ```
 
 
