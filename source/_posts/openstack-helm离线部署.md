@@ -15,7 +15,7 @@ tags:
 
 > 文章中引用的chart包是经过改造的，如需要，请联系笔者
 >
-> Linux发行版为centos7，openstack版本为train版（train以上版本无法完全适配centos7 3.10 kernel）
+> Linux发行版为centos7，openstack版本为w版（nova组件为u版，u版以上无法完全适配centos7 3.10 kernel）
 
 # 一.helm准备
 
