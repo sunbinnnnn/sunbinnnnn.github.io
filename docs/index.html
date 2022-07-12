@@ -147,13 +147,141 @@
   
     <article class="article-card">
       <h2 class="article-head">
-        <a href="/2022/05/12/Go%E5%B9%B6%E5%8F%91/">Go并发</a>
+        <a href="/2022/07/12/Go%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD%E8%B8%A9%E5%9D%91/">Go并发-并发原语踩坑</a>
+      </h2>
+      <p class="article-date">July 12, 2022</p>
+      
+        
+  <a href="/tags#并发" >
+    <span class="tag-code">并发</span>
+  </a>
+
+  <a href="/tags#Golang" >
+    <span class="tag-code">Golang</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          RWMutex 的 3 个踩坑点1：不可复制不能复制的原因和互斥锁一样。一旦读写锁被使用，它的字段就会记录它当前的一些状态。这个时候你去复制这把锁，就会把它的状态也给复制过来。但是，原来的锁在释放的时候，并不会修改你复制出来的这个读写锁，这就会导致复制出来的读写锁的状态不对，可能永远无法释放 ...
+        
+      </div>
+      <a class="more" href="/2022/07/12/Go%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD%E8%B8%A9%E5%9D%91/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2022/07/11/Redis%E4%BA%91%E5%8E%9F%E7%94%9F%E8%AE%BE%E8%AE%A1/">Redis云原生设计</a>
+      </h2>
+      <p class="article-date">July 11, 2022</p>
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2022/07/11/Redis%E4%BA%91%E5%8E%9F%E7%94%9F%E8%AE%BE%E8%AE%A1/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2022/07/11/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AF%87/">架构设计-设计模式篇</a>
+      </h2>
+      <p class="article-date">July 11, 2022</p>
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2022/07/11/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AF%87/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD/">Go并发-常见并发原语</a>
+      </h2>
+      <p class="article-date">July 11, 2022</p>
+      
+        
+  <a href="/tags#并发" >
+    <span class="tag-code">并发</span>
+  </a>
+
+  <a href="/tags#Golang" >
+    <span class="tag-code">Golang</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-goroutine%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/">Go并发-goroutine并发模型</a>
+      </h2>
+      <p class="article-date">July 11, 2022</p>
+      
+        
+  <a href="/tags#并发" >
+    <span class="tag-code">并发</span>
+  </a>
+
+  <a href="/tags#Golang" >
+    <span class="tag-code">Golang</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-goroutine%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-channel/">Go并发-channel</a>
+      </h2>
+      <p class="article-date">July 11, 2022</p>
+      
+        
+  <a href="/tags#并发" >
+    <span class="tag-code">并发</span>
+  </a>
+
+  <a href="/tags#Golang" >
+    <span class="tag-code">Golang</span>
+  </a>
+
+      
+      <div class="article-summary">
+        
+          
+        
+      </div>
+      <a class="more" href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-channel/">Read more</a>
+    </article>
+  
+    <article class="article-card">
+      <h2 class="article-head">
+        <a href="/2022/05/12/Go%E5%B9%B6%E5%8F%91/">Go并发 - 并发原语Mutex、RWMutex</a>
       </h2>
       <p class="article-date">May 12, 2022</p>
       
         
-  <a href="/tags#Golang 并发问题" >
-    <span class="tag-code">Golang 并发问题</span>
+  <a href="/tags#并发" >
+    <span class="tag-code">并发</span>
+  </a>
+
+  <a href="/tags#Golang" >
+    <span class="tag-code">Golang</span>
   </a>
 
       
@@ -269,102 +397,6 @@ VIP
         
       </div>
       <a class="more" href="/2022/01/19/%E4%B8%80%E8%87%B4%E6%80%A7%E8%AF%9D%E9%A2%98/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/06/23/kubelet/">kubelet</a>
-      </h2>
-      <p class="article-date">June 23, 2021</p>
-      
-      <div class="article-summary">
-        
-          
-        
-      </div>
-      <a class="more" href="/2021/06/23/kubelet/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/06/15/garbage-collector-controller/">garbage-collector-controller</a>
-      </h2>
-      <p class="article-date">June 15, 2021</p>
-      
-        
-  <a href="/tags#k8s" >
-    <span class="tag-code">k8s</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          <p>Kubernetes在删除对象时，其对应的controller并不会真正去删除对象，删除对象工作是由GarbageCollectorController负责的。</p>
-        
-      </div>
-      <a class="more" href="/2021/06/15/garbage-collector-controller/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/04/20/CSI-plugin/">CSI plugin</a>
-      </h2>
-      <p class="article-date">April 20, 2021</p>
-      
-        
-  <a href="/tags#k8s" >
-    <span class="tag-code">k8s</span>
-  </a>
-
-      
-      <div class="article-summary">
-        
-          <p>在了解k8s的CSI plugin编写前，我们需要先了解下有关K8S的持久化存储机制。</p>
-        
-      </div>
-      <a class="more" href="/2021/04/20/CSI-plugin/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/04/09/Cloud-Devops/">Cloud Devops</a>
-      </h2>
-      <p class="article-date">April 9, 2021</p>
-      
-      <div class="article-summary">
-        
-          
-        
-      </div>
-      <a class="more" href="/2021/04/09/Cloud-Devops/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/04/09/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">容器文件系统</a>
-      </h2>
-      <p class="article-date">April 9, 2021</p>
-      
-      <div class="article-summary">
-        
-          
-        
-      </div>
-      <a class="more" href="/2021/04/09/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/">Read more</a>
-    </article>
-  
-    <article class="article-card">
-      <h2 class="article-head">
-        <a href="/2021/04/09/linux-container/">linux container</a>
-      </h2>
-      <p class="article-date">April 9, 2021</p>
-      
-      <div class="article-summary">
-        
-          
-        
-      </div>
-      <a class="more" href="/2021/04/09/linux-container/">Read more</a>
     </article>
   
 
