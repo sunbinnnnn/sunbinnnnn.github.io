@@ -163,7 +163,7 @@
       
       <div class="article-summary">
         
-          RWMutex 的 3 个踩坑点1：不可复制不能复制的原因和互斥锁一样。一旦读写锁被使用，它的字段就会记录它当前的一些状态。这个时候你去复制这把锁，就会把它的状态也给复制过来。但是，原来的锁在释放的时候，并不会修改你复制出来的这个读写锁，这就会导致复制出来的读写锁的状态不对，可能永远无法释放 ...
+          <p>本文介绍Golang中常用并发原语的一些使用踩坑点。</p>
         
       </div>
       <a class="more" href="/2022/07/12/Go%E5%B9%B6%E5%8F%91-%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD%E8%B8%A9%E5%9D%91/">Read more</a>
@@ -174,6 +174,16 @@
         <a href="/2022/07/11/Redis%E4%BA%91%E5%8E%9F%E7%94%9F%E8%AE%BE%E8%AE%A1/">Redis云原生设计</a>
       </h2>
       <p class="article-date">July 11, 2022</p>
+      
+        
+  <a href="/tags#k8s" >
+    <span class="tag-code">k8s</span>
+  </a>
+
+  <a href="/tags#分布式中间件" >
+    <span class="tag-code">分布式中间件</span>
+  </a>
+
       
       <div class="article-summary">
         
@@ -215,7 +225,7 @@
       
       <div class="article-summary">
         
-          
+          <p>接上文：<a target="_blank" rel="noopener" href="https://blog.neilcloud.net/2022/05/12/Go%E5%B9%B6%E5%8F%91/"><strong>Go并发 - 并发原语Mutex、RWMutex</strong></a></p>
         
       </div>
       <a class="more" href="/2022/07/11/Go%E5%B9%B6%E5%8F%91-%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD/">Read more</a>
@@ -298,6 +308,16 @@
         <a href="/2022/04/19/openstack-helm%E7%A6%BB%E7%BA%BF%E9%83%A8%E7%BD%B2/">openstack-helm离线部署</a>
       </h2>
       <p class="article-date">April 19, 2022</p>
+      
+        
+  <a href="/tags#k8s" >
+    <span class="tag-code">k8s</span>
+  </a>
+
+  <a href="/tags#openstack" >
+    <span class="tag-code">openstack</span>
+  </a>
+
       
       <div class="article-summary">
         

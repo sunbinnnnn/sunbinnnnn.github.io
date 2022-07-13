@@ -2,6 +2,8 @@
 title: openstack-helm离线部署
 date: 2022-04-19 14:27:23
 tags:
+- k8s
+- openstack
 ---
 
 
