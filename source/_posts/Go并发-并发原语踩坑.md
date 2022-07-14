@@ -265,3 +265,45 @@ func bufioWriterPool(size int) *sync.Pool {
 }
 ```
 
+## Channel踩坑点
+
+### **panic**
+
+使用 Channel 最常见的错误是 panic 和 goroutine 泄漏。首先，我们来总结下会 panic 的情况，总共有 3 种：
+
+- **close 为 nil 的 chan。**
+- **send 已经 close 的 chan。**
+- **close 已经 close 的 chan。**
+
+除了这三种外，当所有goroutine处于send/recv阻塞时，也会出现死锁（deadlock）panic。
+
+### **goroutine泄露**
+
+```go
+func process(timeout time.Duration) bool {
+    ch := make(chan bool)
+
+    go func() {
+        // 模拟处理耗时的业务
+        time.Sleep((timeout + time.Second))
+        ch <- true // block
+        fmt.Println("exit goroutine")
+    }()
+    select {
+    case result := <-ch:
+        return result
+    case <-time.After(timeout):
+        return false
+    }
+}
+```
+
+在这个例子中，process 函数会启动一个 goroutine，去处理需要长时间处理的业务，处理完之后，会发送 true 到 chan 中，目的是通知其它等待的 goroutine，可以继续处理了。
+
+我们来看一下第 10 行到第 15 行，主 goroutine 接收到任务处理完成的通知，或者超时后就返回了。
+
+如果发生超时，process 函数就返回了，这就会导致 unbuffered 的 chan 从来就没有被读取。
+
+unbuffered chan 必须等 reader 和 writer 都准备好了才能交流，否则就会阻塞。超时导致未读，结果就是子 goroutine 就阻塞在第 7 行永远结束不了，进而导致 goroutine 泄漏。
+
+解决这个 Bug 的办法很简单，就是**将 unbuffered chan 改成容量为 1 的 chan**，这样第 7 行就不会被阻塞了。

@@ -13,9 +13,9 @@ typora-root-url: ..
 
 上文提到了关于Golang的两个基础并发原语Mutex、RWMutex，接下来我们来介绍下Golang中常见的几个并发原语和并发场景：
 
-#### **WaitGroup**
+## **WaitGroup**
 
-##### **基本用法**
+### **基本用法**
 
 ```go
 func (wg *WaitGroup) Add(delta int)
@@ -29,7 +29,7 @@ func (wg *WaitGroup) Wait()
 
 **example:**
 
-```
+```go
 // 线程安全的计数器
 type Counter struct {
     mu    sync.Mutex
@@ -70,7 +70,7 @@ func main() {
 }
 ```
 
-##### **内部实现**
+### **内部实现**
 
 ```go
 type WaitGroup struct {
@@ -155,11 +155,11 @@ func (wg *WaitGroup) Wait() {
 
 
 
-#### **Cond**
+## **Cond**
 
 Cond并不常用，一般用在需要在唤醒一个或者所有的等待者做一些检查操作的时候（等待/通知（wait/notify）机制）。
 
-##### **基本用法**
+### **基本用法**
 
 ```go
 type Cond
@@ -213,11 +213,11 @@ func main() {
 
 
 
-#### **Once**
+## **Once**
 
 Once使用比较简单，一般在进行单例对象（如数据库链接、配置对象等）初始化时使用。
 
-##### **基本用法**
+### **基本用法**
 
 当我们需要初始化单例对象时，可以通过定义package级别的变量或者在init、main函数开始执行的时候执行一个初始化函数，这些方式都是线程安全的，但很多时候我们需要进行**延迟初始化**。
 
@@ -296,9 +296,9 @@ func ForceAusFromTZIForTesting() {
   }
 ```
 
-##### **内部实现**
+### **内部实现**
 
-```
+```go
 type Once struct {
     done uint32
     m    Mutex
@@ -326,15 +326,15 @@ Once 实现要**使用一个互斥锁，这样初始化的时候如果有并发�
 
 使用互斥锁主要是为了当参数f执行很慢时，后续调用Do方法的goroutine虽然看到 done 已经设置为执行过了，但是获取某些初始化资源的时候可能会得到空的资源，因为 f 还没有执行完。
 
-#### **map**
+## **map**
 
 map在Go中是非线程安全的数据结构，在多个goroutine同时访问一个map对象时，程序会panic。
 
 我们一般需要通过加锁的方式来实现一个线程安全的map。
 
-##### **1.采用读写锁来保护map**
+### **采用读写锁来保护map**
 
-```
+```go
 type RWMap struct { // 一个读写锁保护的线程安全的map
     sync.RWMutex // 读写锁保护下面的map字段
     m map[int]int
@@ -383,7 +383,7 @@ func (m *RWMap) Each(f func(k, v int) bool) { // 遍历map
 
 ```
 
-##### **2.分片加锁**
+### **分片加锁**
 
 采用RWMutex可以解决map线程不安全的问题，但在大量并发读写的情况下，性能较差，这里可以采用分片加锁的方式来实现细粒度加锁（https://github.com/orcaman/concurrent-map）：
 
@@ -434,14 +434,14 @@ func (m ConcurrentMap) Get(key string) (interface{}, bool) {
 }
 ```
 
-##### **3.sync.Map**
+### **sync.Map**
 
 sync.Map是Go的官方库中的实现，在使用上与标准的map类型有所区别，一般在以下场景下，sync.Map的性能会优于map+RWMutex：
 
 - 只会增长的缓存系统中，一个 key 只写入一次而被读很多次。
 - 多个 goroutine 为不相交的键集读、写和重写键值对。
 
-###### **sync.Map的基本使用**
+#### **sync.Map的基本使用**
 
 Store：用来设置一个键值对，或者更新一个键值对的。
 
@@ -451,7 +451,7 @@ Delete：用来删除一个key
 
 sync.map 还有一些 LoadAndDelete、LoadOrStore、Range 等辅助方法，但是没有 Len 这样查询 sync.Map 的包含项目数量的方法，并且官方也不准备提供。如果你想得到 sync.Map 的项目数量的话，你可能不得不通过 Range 逐个计数。
 
-###### **sync.Map的实现**
+#### **sync.Map的实现**
 
 sync.Map主要的实现逻辑如下：
 
@@ -630,13 +630,13 @@ Delete 方法也是先从 read 操作开始，因为不需要锁。
 
 如果 read 中不存在，那么就需要从 dirty 中寻找这个项目。最终，如果项目存在就删除（将它的值标记为 nil）。如果项目不为 nil 或者没有被标记为 expunged，那么还可以把它的值返回。
 
-#### **Pool**
+## **Pool**
 
 Pool指代一类建立池化对象的并发数据结构，由于Go自带垃圾回收机制，当需要保留一些创建耗时的对象（例如数据库链接等）时，我们一般会采用Pool的数据结构来存放。
 
 Go标准库中提供了一个通用的Pool数据结构，sync.Pool。
 
-##### **sync.Pool**
+### **sync.Pool**
 
 sync.Pool 本身就是线程安全的，多个 goroutine 可以并发地调用它的方法存取对象，需要注意的是sync.Pool 不可在使用之后再复制使用。
 
@@ -676,9 +676,9 @@ func PutBuffer(buf *bytes.Buffer) {
 }
 ```
 
-##### **sync.Pool内部实现**
+#### **sync.Pool内部实现**
 
-###### **关于GC**
+##### **关于GC**
 
 Go 1.1.3之前，sync.Pool实现有2大问题：
 
@@ -727,7 +727,7 @@ func poolCleanup() {
 - private：代表一个缓存的元素，而且只能由相应的一个 P 存取。因为一个 P 同时只能执行一个 goroutine，所以不会有并发的问题。
 - shared：可以由任意的 P 访问，但是只有本地的 P 才能 pushHead/popHead，其它 P 可以 popTail，相当于只有一个本地的 P 作为生产者（Producer），多个 P 作为消费者（Consumer），它是使用一个 local-free 的 queue 列表实现的。
 
-###### **Get方法**
+##### **Get方法**
 
 ```go
 func (p *Pool) Get() interface{} {
@@ -795,9 +795,7 @@ func (p *Pool) getSlow(pid int) interface{} {
 }
 ```
 
-
-
-###### **Put方法**
+##### **Put方法**
 
 ```go
 func (p *Pool) Put(x interface{}) {
@@ -818,15 +816,15 @@ func (p *Pool) Put(x interface{}) {
 
 Put 的逻辑相对简单，优先设置本地 private，如果 private 字段已经有值了，那么就把此元素 push 到本地队列中。
 
-##### **连接池**
+### **连接池**
 
 由于sync.Pool 会无通知地在某个时候就把连接移除垃圾回收掉了，而我们需要长久保持这个连接时，一般会使用其它方法来池化连接。
 
-###### **http client 池**
+#### **http client 池**
 
 标准库的 http.Client 是一个 http client 的库，可以用它来访问 web 服务器。为了提高性能，这个 Client 的实现也是通过池的方法来缓存一定数量的连接，以便后续重用这些连接。
 
-###### **TCP 连接池**
+#### **TCP 连接池**
 
 最常用的一个 TCP 连接池是 fatih 开发的[fatih/pool](https://github.com/fatih/pool)，虽然这个项目已经被 fatih 归档（Archived），不再维护了，但是因为它相当稳定了，我们可以开箱即用。即使你有一些特殊的需求，也可以 fork 它，然后自己再做修改。
 
@@ -855,11 +853,11 @@ func (p *PoolConn) Close() error {
   }
 ```
 
-###### **数据库连接池**
+#### **数据库连接池**
 
 标准库 sql.DB 还提供了一个通用的数据库的连接池，通过 MaxOpenConns 和 MaxIdleConns 控制最大的连接数和最大的 idle 的连接数。默认的 MaxIdleConns 是 2，这个数对于数据库相关的应用来说太小了，我们一般都会调整它。
 
-##### **Worker Pool**
+### **Worker Pool**
 
 大量的goroutine会导致无效的调度和垃圾回收，为了防止goroutine溢出等情况，有时候我们需要创建Worker Pool来控制goroutine的数量。
 
@@ -871,11 +869,11 @@ func (p *PoolConn) Close() error {
 
 [dpaks/goworkers](https://pkg.go.dev/github.com/dpaks/goworkers?utm_source=godoc)：dpaks/goworkers 提供了更便利的 Submit 方法提交任务以及 Worker 数、任务数等查询方法、关闭 Pool 的方法。它的任务的执行结果需要在 ResultChan 和 ErrChan 中去获取，没有提供阻塞的方法，但是它可以在初始化的时候设置 Worker 的数量和任务数。
 
-#### **Context**
+## **Context**
 
 Context的出现主要为了解决goroutine的控制以及goroutine间的上下文信息传递（如认证信息、环境信息等）。
 
-##### **Context基本用法**
+### **Context基本用法**
 
 ```go
 type Context interface {
@@ -916,7 +914,7 @@ type Context interface {
 
 我们一般使用Context时，会采用**WithValue、WithCancel、WithTimeout 和 WithDeadline**：
 
-###### **WithValue**
+#### **WithValue**
 
 WithValue 基于 parent Context 生成一个新的 Context，保存了一个 key-value 键值对。它常常用来传递上下文，Context实现了链式查找，如果当前context不包含所查找的key，会像parent Context中去查找。
 
@@ -965,7 +963,7 @@ func watch(ctx context.Context) {
 
 
 
-###### **WithCanel\withDeadline\withTimeout**
+#### **WithCanel\withDeadline\withTimeout**
 
 ```go
 func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
