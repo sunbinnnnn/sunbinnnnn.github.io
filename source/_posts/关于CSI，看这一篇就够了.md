@@ -1,7 +1,8 @@
 ---
-title: CSI plugin
+title: 关于CSI，看这一篇就够了
 date: 2021-04-20 16:37:27
 tags: k8s
+typora-root-url: ..
 ---
 
 在了解k8s的CSI plugin编写前，我们需要先了解下有关K8S的持久化存储机制。
@@ -10,7 +11,7 @@ tags: k8s
 
 
 
-### 理解k8s持久化存储
+## 理解k8s持久化存储
 
 在k8s中，持久化存储采用PV和PVC进行绑定的的方式进行管理。
 
@@ -61,7 +62,7 @@ spec:
 
 首先说静态，通过静态方式进行时，由管理员创建PV，通过PersistentVolumeController，k8s可以完成PV和PVC的绑定，PersistentVolumeController(`pkg/controller/volume/persistentvolume/pv_controller.go`)存在一个控制循环，不断遍历所有可用状态的PV，尝试与PVC进行绑定（Bound）操作，绑定成功后，则为声明该PVC的Pod提供存储服务。
 
-#### PV和PVC绑定调度流程：
+### PV和PVC绑定调度流程
 
 当PVC被声明出来时（单独声明 or statefulSet），会被cache.Controller watch到，并开始执行`syncClaim`函数：
 
@@ -192,7 +193,7 @@ if smallestVolume != nil {
 
 以上是PV和PVC的调度绑定流程。
 
-#### Dynamic Provisioning
+### Dynamic Provisioning
 
 这个过程在PersistentVolumeController中完成，而当Pod在实际使用Volume前，需要通过Attach以及Mount流程后，才能真正进行使用。
 
@@ -272,7 +273,7 @@ type goRoutineMap struct {
 
 
 
-#### Attach & Mount
+### Attach & Mount
 
 在实际挂载时，通过ADController调用CSI的Attach操作，并在kubelet中调用Mount操作，完成存储卷和Pod的挂载过程。
 
@@ -311,3 +312,81 @@ func (oe *operationExecutor) AttachVolume(
 
 关于VolumeManager的处理逻辑会在kubelet的详细介绍文章中介绍。
 
+
+
+## 编写CSI
+
+在理解了K8S处理持久化卷的机制后，我们就可以来尝试编写CSI了。
+
+首先CSI不是in-tree模式的存储插件，一般通过daemonSet的方式部署在节点上。
+
+CSI插件体系的设计思想，**就是把 Provision 阶段，以及 Kubernetes 里的一部分存储管理功能，从主干代码里剥离出来，做成了几个单独的组件。**
+
+CSI设计思想示意图：
+
+<img src="/images/d4bdc7035f1286e7a423da851eee89ad.png" alt="img" style="zoom: 67%;" />
+
+可以看出，CSI可以大体分为两部分（上图External Components和Custum Components部分），其中左半部分是k8S所提供的控制面服务，而右侧则是CSI开发者需要关注的部分。
+
+而再往左侧，K8S原生的控制面服务，则是对CSI组件的请求调用，我们暂且忽略。
+
+先看下左半部分External Components。
+
+External Components同样也是被K8S社区所维护的项目，存放与K8S的CSI SIG中。
+
+### **Driver Registrar**
+
+#### **概述**
+
+
+
+**Driver Registerar 组件通过请求CSI插件的Identity服务，来获取插件信息，将插件注册到kubelet中。**在当前的K8S版本中（CSI spec 0.3后），Driver Registrar已不再维护，取而代之的是[cluster-driver-registrar](https://github.com/kubernetes-csi/cluster-driver-registrar)和[node-driver-registrar](https://github.com/kubernetes-csi/node-driver-registrar)。而在K8S 1.13版本以后，cluster-driver-registrar也进入deprecated，在1.16版本以后被正式弃用。**而[node-driver-registrar](https://github.com/kubernetes-csi/node-driver-registrar)是目前仍在维护的driver registar。而cluster-deriver-registar需要通过创建 [CSIDriver Object ](https://kubernetes-csi.github.io/docs/csi-driver-object.html)的方式来实现。**
+
+node-driver-registrar的本质是sidecar容器，一般与CSI的daemonSet容器部署在一起。
+
+部署yaml example：
+
+```yaml
+      containers:
+        - name: csi-driver-registrar
+          image: k8s.gcr.io/sig-storage/csi-node-driver-registrar:v2.5.0
+          args:
+            - "--csi-address=/csi/csi.sock"
+            - "--kubelet-registration-path=/var/lib/kubelet/plugins/<drivername.example.com>/csi.sock"
+            - "--health-port=9809"
+          volumeMounts:
+            - name: plugin-dir
+              mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
+          ports:
+            - containerPort: 9809
+              name: healthz
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: healthz
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+      volumes:
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry/
+            type: Directory
+        - name: plugin-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/<drivername.example.com>/
+            type: DirectoryOrCreate
+```
+
+
+
+#### **核心逻辑分析**
+
+
+
+### **External Provisioner**
+
+
+
+### **External Attacher **

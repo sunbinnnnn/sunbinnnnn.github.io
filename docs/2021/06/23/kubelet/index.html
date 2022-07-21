@@ -153,8 +153,27 @@
 <main class="app-body flex-box">
   <!-- Article START -->
   <article class="post-article">
-    <section class="markdown-content"></section>
+    <section class="markdown-content"><p>在<a target="_blank" rel="noopener" href="https://blog.neilcloud.net/2021/04/20/%E5%85%B3%E4%BA%8ECSI%EF%BC%8C%E7%9C%8B%E8%BF%99%E4%B8%80%E7%AF%87%E5%B0%B1%E5%A4%9F%E4%BA%86/">CSI的文章</a>中，我们分析了K8S对存储卷的操作，这里除了CSI Controller对PVC的定义外，kubelet也起到了很大的作用，本文主要针对kubelet的实现逻辑进行分析</p>
+<span id="more"></span>
+
+<h2 id="Kubelet的工作原理"><a href="#Kubelet的工作原理" class="headerlink" title="Kubelet的工作原理"></a>Kubelet的工作原理</h2><p>kubelet工作在K8S的每个节点上，承担了与节点交互的角色，例如挂载volume卷，创建容器namespace等。</p>
+<p>下图是kubelet工作原理的示意图：</p>
+<img src="/images/914e097aed10b9ff39b509759f8b1d03.png" alt="img" style="zoom:67%;" />
+
+
+
+<p>可以看出，kubelet本身也是一个控制器，遵循k8s控制器的设计模式，</p>
+<h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2></section>
     <!-- Tags START -->
+    
+      <div class="tags">
+        <span>Tags:</span>
+        
+  <a href="/tags#k8s" >
+    <span class="tag-code">k8s</span>
+  </a>
+
+      </div>
     
     <!-- Tags END -->
     <!-- NAV START -->
@@ -197,7 +216,7 @@
   <div class="toc-main">
     <strong class="toc-title">Catalog</strong>
     
-      <ol class="nav">none</ol>
+      <ol class="toc-nav"><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#Kubelet%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-nav-text">Kubelet的工作原理</span></a></li><li class="toc-nav-item toc-nav-level-2"><a class="toc-nav-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90"><span class="toc-nav-text">代码解析</span></a></li></ol>
     
   </div>
 </aside>

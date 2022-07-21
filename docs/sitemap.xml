@@ -2,6 +2,41 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://example.com/2021/04/20/%E5%85%B3%E4%BA%8ECSI%EF%BC%8C%E7%9C%8B%E8%BF%99%E4%B8%80%E7%AF%87%E5%B0%B1%E5%A4%9F%E4%BA%86/</loc>
+    
+    <lastmod>2022-07-16</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/06/23/kubelet/</loc>
+    
+    <lastmod>2022-07-16</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2022/07/11/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AF%87/</loc>
+    
+    <lastmod>2022-07-16</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/</loc>
+    
+    <lastmod>2022-07-16</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://example.com/2022/05/12/Go%E5%B9%B6%E5%8F%91/</loc>
+    
+    <lastmod>2022-07-15</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://example.com/2022/07/11/Go%E5%B9%B6%E5%8F%91-channel/</loc>
     
     <lastmod>2022-07-14</lastmod>
@@ -17,13 +52,6 @@
   
   <url>
     <loc>http://example.com/2022/07/11/Go%E5%B9%B6%E5%8F%91-%E5%B8%B8%E8%A7%81%E5%B9%B6%E5%8F%91%E5%8E%9F%E8%AF%AD/</loc>
-    
-    <lastmod>2022-07-14</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2022/05/12/Go%E5%B9%B6%E5%8F%91/</loc>
     
     <lastmod>2022-07-14</lastmod>
     
@@ -51,13 +79,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2022/07/11/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%AF%87/</loc>
-    
-    <lastmod>2022-07-11</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2022/04/15/kubeadm%E9%83%A8%E7%BD%B2%E7%94%9F%E4%BA%A7k8s/</loc>
     
     <lastmod>2022-05-16</lastmod>
@@ -68,13 +89,6 @@
     <loc>http://example.com/2022/01/19/%E4%B8%80%E8%87%B4%E6%80%A7%E8%AF%9D%E9%A2%98/</loc>
     
     <lastmod>2022-04-18</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/04/20/CSI-plugin/</loc>
-    
-    <lastmod>2021-07-13</lastmod>
     
   </url>
   
@@ -100,13 +114,6 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/04/09/K8S-Operator/</loc>
-    
-    <lastmod>2021-07-13</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://example.com/2021/04/09/Cloud-Devops/</loc>
     
     <lastmod>2021-07-13</lastmod>
@@ -114,7 +121,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/06/15/garbage-collector-controller/</loc>
+    <loc>http://example.com/2021/04/09/K8S-Operator/</loc>
     
     <lastmod>2021-07-13</lastmod>
     
@@ -128,14 +135,7 @@
   </url>
   
   <url>
-    <loc>http://example.com/2021/06/23/kubelet/</loc>
-    
-    <lastmod>2021-07-13</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</loc>
+    <loc>http://example.com/2021/06/15/garbage-collector-controller/</loc>
     
     <lastmod>2021-07-13</lastmod>
     
@@ -149,21 +149,14 @@
   </url>
   
   <url>
+    <loc>http://example.com/2021/04/08/linux%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/</loc>
+    
+    <lastmod>2021-07-13</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F/</loc>
-    
-    <lastmod>2021-07-13</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E7%BD%91%E7%BB%9C/</loc>
-    
-    <lastmod>2021-07-13</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/</loc>
     
     <lastmod>2021-07-13</lastmod>
     
@@ -176,10 +169,17 @@
     
   </url>
   
+  <url>
+    <loc>http://example.com/2021/04/09/%E5%AE%B9%E5%99%A8%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93/</loc>
+    
+    <lastmod>2021-07-13</lastmod>
+    
+  </url>
+  
 
   <url>
     <loc>http://example.com/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -187,49 +187,49 @@
   
   <url>
     <loc>http://example.com/tags/%E5%B9%B6%E5%8F%91/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/Golang/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/k8s/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%AD%E9%97%B4%E4%BB%B6/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/system/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/container/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://example.com/tags/openstack/</loc>
-    <lastmod>2022-07-14</lastmod>
+    <lastmod>2022-07-19</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>

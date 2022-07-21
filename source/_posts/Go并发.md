@@ -12,19 +12,19 @@ tags:
 
 <!--more-->
 
-## 并发原语
+**并发原语**
 
 原语一般是指内核提供给核外调用的过程或者函数成为原语（primitive），原语在执行过程中不允许中断,而并发原语一般是指原语的并发实现。
 
 Golang作为主打并发编程的语言，在其设计中，也存在一系列的并发原语来解决并发编程中资源访问、线程交互等并发问题。
 
-#### **Mutex**
+## **Mutex**
 
 Mutex即Go中最基本的互斥锁（排他锁）实现，在并发编程中，我们常常需要保障一组内存空间（资源）在同一时间有且仅有一个对象在访问或操作，这一组内存空间（资源）一般被称为**临界区**。
 
 使用互斥锁可以限制临界区内只能由一个线程访问。
 
-##### **Mutex（Locker）接口包含方法**
+### **Mutex（Locker）接口包含方法**
 
 ```go
 type Locker interface {
@@ -37,7 +37,7 @@ Lock：进入临界区时调用
 
 Unlock：退出临界区时调用
 
-##### **Mutex使用方法**
+### **Mutex使用方法**
 
 Mutex可以直接在代码中进行调用，而无需初始化
 ```go
@@ -99,7 +99,7 @@ func (f *Counter) Bar() {
 }
 ```
 
-##### **Mutex内部实现**
+### **Mutex内部实现**
 
 虽然其他语言同样有关于Mutex的实现，这里我们只关注Go的Mutex实现。
 
@@ -107,7 +107,7 @@ Mutex的架构演进过程：
 
 初版（完全依赖CAS） ->  给新人机会（新的goroutine也能有机会竞争锁） -> 多给些机会（新来的和被唤醒的有更多的机会竞争锁） -> 解决饥饿问题（解决竞争问题，不会让goroutine长久等待）
 
-###### **初版**
+#### **初版**
 
 完全依赖于CAS（compare-and-swap）。这里简单描述下CAS指令的过程，CAS指令将**给定的值**和**内存地址中的值**进行比较，如果是同一个值，就使用新值替换内存中地址中的值，**如果同时有其他线程已经修改了这个值，CAS返回失败，返回false**，不难看出，CAS是一个原子（atomic）操作。
 
@@ -167,7 +167,7 @@ Mutex结构体包含两个字段：
 
 这种设计比较简单，但如果其他goroutine提前释放了自己的锁，在临界区的goroutine可能不知道自己的锁已经释放了，会带来data race问题。在使用Mutex要遵循<u>**谁申请，谁释放**</u>的原则。
 
-###### **给新人机会**
+#### **给新人机会**
 
 Mutex发展的第二阶段，对Mutex进行了一次大的调整：
 
@@ -263,7 +263,7 @@ func (m *Mutex) Unlock() {
 - 第一种情况（无waiter竞争），如果没有其它的 waiter，说明对这个锁的竞争的 goroutine 只有一个，那就可以直接返回了；如果这个时候有唤醒的 goroutine，或者是又被别人加了锁，那么，无需我们操劳，其它 goroutine 自己干得都很好，当前的这个 goroutine 就可以放心返回了。
 - 第二种情况（存在waiter），如果有等待者，并且没有唤醒的 waiter，那就需要唤醒一个等待的 waiter。在唤醒之前，需要将 waiter 数量减 1，并且将 mutexWoken 标志设置上，这样，Unlock 就可以返回了。
 
-###### **多给些机会**
+#### **多给些机会**
 
 在这次的改动中，Golang工程师加入了[自旋](https://github.com/golang/go/blob/846dce9d05f19a1f53465e62a304dea21b99f910/src/runtime/proc.go#L5580)（spin，通过循环不断尝试）的特性。
 
@@ -313,7 +313,7 @@ func (m *Mutex) Lock() {
 
 如果可以 spin 的话，第 9 行的 for 循环会重新检查锁是否释放。对于临界区代码执行非常短的场景来说，这是一个非常好的优化。因为**临界区的代码耗时很短，锁很快就能释放**，而抢夺锁的 goroutine 不用通过休眠唤醒方式等待调度，直接 spin 几次，可能就获得了锁。
 
-###### **解决饥饿问题**
+#### **解决饥饿问题**
 
 在之前的几代Mutex优化中，考虑的主要是为“新来的goroutine”分配临界区的占有权，而在极端情况下，很可能出现**等待中的goroutine一直获取不到锁的情况，出现饥饿问题**。
 
@@ -449,7 +449,7 @@ func (m *Mutex) unlockSlow(new int32) {
 
 与之前的实现相比，当前的 Mutex 最重要的变化，就是增加饥饿模式。第 123行将饥饿模式的最大等待时间阈值设置成了 1 毫秒，这就意味着，一旦等待者等待的时间超过了这个阈值，Mutex 的处理就有可能进入饥饿模式。
 
-###### **饥饿模式 vs 正常模式**
+#### **饥饿模式 vs 正常模式**
 
 请求锁时调用的 Lock 方法中一开始是 fast path，这是一个幸运的场景，当前的 goroutine 幸运地获得了锁，没有竞争，直接返回，否则就进入了 lockSlow 方法。
 
@@ -468,11 +468,11 @@ func (m *Mutex) unlockSlow(new int32) {
 
 综上，则是Mutex整个发展过程，可以看出Mutex设计者的一个核心理念： 在**Mutex的设计中，绝不容忍一个goroutine被落下，尽可能地让等待时间较长的goroutine更有机会获取到锁。**
 
-#### **RWMutex**
+## **RWMutex**
 
 Mutex已经能够为我们保证临界区资源的并发安全，但相对得牺牲了并发性能，为此，我们需要引入“读写分离”的概念，把并发中的写和读单独抽出考虑。
 
-##### **RWMutex接口包含方法**
+### **RWMutex接口包含方法**
 
 **Lock/Unlock**：写操作时调用的方法。如果锁已经被 reader 或者 writer 持有，那么，Lock 方法会一直阻塞，直到能获取到锁；Unlock 则是配对的释放锁的方法。
 
@@ -480,7 +480,7 @@ Mutex已经能够为我们保证临界区资源的并发安全，但相对得牺
 
 **RLocker**：这个方法的作用是为读操作返回一个 Locker 接口的对象。它的 Lock 方法会调用 RWMutex 的 RLock 方法，它的 Unlock 方法会调用 RWMutex 的 RUnlock 方法。
 
-##### **Mutex使用方法**
+### **Mutex使用方法**
 
 RWMutex和Mutex一样，零值是未加锁的状态，当使用时，可以嵌入到其他strcut中，不必显示初始化。
 
@@ -522,7 +522,7 @@ func (c *Counter) Count() uint64 {
 }
 ```
 
-##### **RWMutex内部实现**
+### **RWMutex内部实现**
 
 Golang中RWMutex是基于Mutex实现的。
 
@@ -558,7 +558,7 @@ const rwmutexMaxReaders = 1 << 30
 
 ***writerSem 和 readerSem：***都是为了阻塞设计的信号量。
 
-###### **RLock/RUnlock 的实现**
+#### **RLock/RUnlock 的实现**
 
 ```go
 func (rw *RWMutex) RLock() {
@@ -589,7 +589,7 @@ func (rw *RWMutex) rUnlockSlow(r int32) {
 
 **当 writer 请求锁的时候，是无法改变既有的 reader 持有锁的现实的，也不会强制这些 reader 释放锁，它的优先权只是限定后来的 reader 不要和它抢。**
 
-###### **Lock 的实现**
+#### **Lock 的实现**
 
 ```
 func (rw *RWMutex) Lock() {
@@ -610,7 +610,7 @@ func (rw *RWMutex) Lock() {
 
 每当一个 reader 释放读锁的时候（调用 RUnlock 方法时），readerWait 字段就减 1，直到所有的活跃的 reader 都释放了读锁，才会唤醒这个 writer。
 
-###### **Unlock 的实现**
+#### **Unlock 的实现**
 
 ```go
 func (rw *RWMutex) Unlock() {
