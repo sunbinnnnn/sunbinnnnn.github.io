@@ -146,9 +146,7 @@ b.trace_print()
 
 2.eBPF用户态程序
 
-![image-20230518193033191](/images/image-20230518193033191.png)
-
-![image-20230518190719115](/images/image-20230518190719115.png
+![image-20230518190719115](/images/image-20230518190719115.png)
 
 eBPF有一组`helper function`来与内核进行交互，在demo中，包含一个`helper function`: `bpf_trace_printk()`，用来输出一行信息到trace_pipe（/sys/kernel/debug/tracing/trace_pipe）文件中。eBPF代码本身是通过C来编写的，理论上需要进行编译才可以运行（实际上单独编写一个eBPF程序也需要编译），但当通过BCC框架来开发时，不需要额外进行编译操作，只需要声明一个BPF object：
 
