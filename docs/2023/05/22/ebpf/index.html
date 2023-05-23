@@ -216,8 +216,7 @@
 <p>这段代码包含两部分：</p>
 <p>1.eBPF内核态程序</p>
 <p>2.eBPF用户态程序</p>
-<p><img src="/images/image-20230518193033191.png" alt="image-20230518193033191"></p>
-<p>![image-20230518190719115](/images/image-20230518190719115.png</p>
+<p><img src="/images/image-20230518190719115.png" alt="image-20230518190719115"></p>
 <p>eBPF有一组<code>helper function</code>来与内核进行交互，在demo中，包含一个<code>helper function</code>: <code>bpf_trace_printk()</code>，用来输出一行信息到trace_pipe（/sys/kernel/debug/tracing/trace_pipe）文件中。eBPF代码本身是通过C来编写的，理论上需要进行编译才可以运行（实际上单独编写一个eBPF程序也需要编译），但当通过BCC框架来开发时，不需要额外进行编译操作，只需要声明一个BPF object：</p>
 <p><code>b = BPF(text=program)</code></p>
 <p>eBPF程序还需要attach到一个event上，在demo中attach到了<code>execve</code>这个syscall上，当任何一个可执行程序被执行时，这个syscall都会被调用，接着就会trigger eBPF程序。一般来说，syscall会根据系统架构的不同，而带一些特定的前缀，例如：</p>
