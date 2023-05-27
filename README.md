@@ -1,6 +1,10 @@
-# sunbinnnnn.github.io
+# https://blog.neilcloud.net/
 
-npm install
-hexo new xxx
-hexo g
-hexo s
+## How to install?
+
+```bash
+$ npm install
+$ hexo new xxx
+$ hexo g
+$ hexo s
+```

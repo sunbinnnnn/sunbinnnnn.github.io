@@ -13,7 +13,7 @@ typora-root-url: ..
 
 <!--more-->
 
-# Learning eBPF总结
+# eBPF
 
 ## 1.eBPF是什么，为何对于如今的操作系统如此重要
 
@@ -522,4 +522,172 @@ eBPF虚拟机有10个一般用途的寄存器（0～9），还有一个10号寄�
 eBPF程序运行前，上下文参数会被加载到Register 1，返回值则会存储到Register 0。
 
 在调用eBPF代码中函数前，函数的参数会存储到Register1到5中（如果低于5个参数，则其他寄存器不会使用）。
+
+#### 3.1.2.eBPF Instructions
+
+在 Kernel 的ebpf的[header代码](https://elixir.bootlin.com/linux/v5.19.17/source/include/uapi/linux/bpf.h#L71)中定义了一个名为`bpf_insn`的结构体，来描述eBPF指令（Instrcutions）
+
+```
+struct bpf_insn {
+	__u8	code;		/* opcode */
+	__u8	dst_reg:4;	/* dest register */
+	__u8	src_reg:4;	/* source register */
+	__s16	off;		/* signed offset */
+	__s32	imm;		/* signed immediate constant */
+};
+```
+
+`bpf_insn`结构体的操作码（opcode）分为这几类：
+
+1.将值加载到寄存器
+
+2.将值从寄存器存储到内存
+
+3.进行算术操作
+
+4.当条件满足时，跳跃到不同的寄存器
+
+接下来，我们来尝试编写一个具体的例子。
+
+#### 3.1.3.“Hello World” for a Network Interface
+
+之前的例子，我们通过eBPF来观测系统调用相关的情况，这次，我们来观测下网络数据包相关的情况。
+
+数据包处理是eBPF应用最多的场景，eBPF可以对每个经过网卡的数据包进行过滤、解析，甚至修改数据包的内容。
+
+下面我们来编写eBPF程序代码，在这个例子中，我们只对数据包计数，二不会对数据包进行任何修改：
+
+```C
+#include <linux/bpf.h> // 引用bpf头文件
+#include <bpf/bpf_helpers.h>
+
+int counter = 0; // 定义自增计数器全局变量
+
+SEC("xdp") // SEC 是一个 macro，用于定义eBPF程序类型
+int hello(struct xdp_md *ctx) { // 这是eBPF程序的主体，eBPF的程序名和函数名一致，即hello
+    bpf_printk("Hello World %d", counter); // 这里使用了bpf_printk()的helper function，来打印信息，和之前的bpf_trace_printk()一样，而后者是BCC框架提供的
+    counter++; 
+    return XDP_PASS; // XDP_PASS是向Kernel指明，该数据包字节交给Kernel，以一般数据的方式处理
+}
+
+char LICENSE[] SEC("license") = "Dual BSD/GPL"; // eBPF程序license声明，当调用的helper function是GPL license时，必须在你的代码中声明GPL license，否则会无法使用
+```
+
+这里例子中，我们将eBPF程序attach到了XDP hook point上，你可以理解为，一旦数据包通过网卡，XDP event就会被触发。
+
+*Tips：有些网卡可以直接运行XDP程序，这使得数据包在到达CPU之前就可以被处理，对于性能的提升会非常大。*
+
+OK，那接下来，我们把这段代码编译一下。
+
+#### 3.1.4.Compiling an eBPF Object File
+
+eBPF源码需要编译为机器码（eBPF字节码）才能在eBPF虚拟机上运行。我们可以通过clang来进行编译，Makefile如下：
+
+```makefile
+TARGETS = hello hello-func
+
+all: $(TARGETS)
+.PHONY: all
+
+$(TARGETS): %: %.bpf.o 
+
+%.bpf.o: %.bpf.c
+	clang \
+	    -target bpf \
+		-I/usr/include/$(shell uname -m)-linux-gnu \
+		-g \
+	    -O2 -o $@ -c $<
+
+clean: 
+	- rm *.bpf.o
+	- rm -f /sys/fs/bpf/hello 
+	- rm -f /sys/fs/bpf/hello-func
+```
+
+可能需要装一些依赖包：
+
+```bash
+apt-get update
+apt-get install -y apt-transport-https ca-certificates curl clang llvm jq
+apt-get install -y libelf-dev libpcap-dev libbfd-dev binutils-dev build-essential make 
+apt-get install -y linux-tools-common linux-tools-5.15.0-41-generic bpfcc-tools
+apt install -y libbpf-dev
+```
+
+执行编译：
+
+```
+make hello-net.bpf.o
+```
+
+#### 3.1.5.Inspecting an eBPF Object File
+
+我们可以通过`file`命令来看下对象文件的内容：
+
+```bash
+# file hello-net.bpf.o 
+hello-net.bpf.o: ELF 64-bit LSB relocatable, eBPF, version 1 (SYSV), with debug_info, not stripped
+```
+
+可以看到，eBPF的对象文件是一个ELF（Excutable and Linkable Format）文件，包含eBPF标识码，对应64位LSB（Least significant bit）架构。
+
+我们可以还可以通过`llvm-objdmp`命令来看更详细反编译信息：
+
+```bash
+# llvm-objdump -S hello-net.bpf.o 
+
+hello-net.bpf.o:        file format elf64-bpf
+
+Disassembly of section xdp:
+
+0000000000000000 <hello>:
+; int hello(struct xdp_md *ctx) {
+       0:       b7 01 00 00 00 00 00 00 r1 = 0
+;     bpf_printk("Hello World %d", counter);
+       1:       73 1a fe ff 00 00 00 00 *(u8 *)(r10 - 2) = r1
+       2:       b7 01 00 00 25 64 00 00 r1 = 25637
+       3:       6b 1a fc ff 00 00 00 00 *(u16 *)(r10 - 4) = r1
+       4:       b7 01 00 00 72 6c 64 20 r1 = 543452274
+       5:       63 1a f8 ff 00 00 00 00 *(u32 *)(r10 - 8) = r1
+       6:       18 01 00 00 48 65 6c 6c 00 00 00 00 6f 20 57 6f r1 = 8022916924116329800 ll
+       8:       7b 1a f0 ff 00 00 00 00 *(u64 *)(r10 - 16) = r1
+       9:       18 06 00 00 00 00 00 00 00 00 00 00 00 00 00 00 r6 = 0 ll
+      11:       61 63 00 00 00 00 00 00 r3 = *(u32 *)(r6 + 0)
+      12:       bf a1 00 00 00 00 00 00 r1 = r10
+      13:       07 01 00 00 f0 ff ff ff r1 += -16
+;     bpf_printk("Hello World %d", counter);
+      14:       b7 02 00 00 0f 00 00 00 r2 = 15
+      15:       85 00 00 00 06 00 00 00 call 6
+;     counter++; 
+      16:       61 61 00 00 00 00 00 00 r1 = *(u32 *)(r6 + 0)
+      17:       07 01 00 00 01 00 00 00 r1 += 1
+      18:       63 16 00 00 00 00 00 00 *(u32 *)(r6 + 0) = r1
+;     return XDP_PASS;
+      19:       b7 00 00 00 02 00 00 00 r0 = 2
+      20:       95 00 00 00 00 00 00 00 exit
+```
+
+基本上是一些寄存器的指令操作，通过opcode，设置值到对应的寄存器，例如这里的`0xb7`，这里不展示讨论了，有兴趣的同学可以参考下eBPF指令集：https://www.kernel.org/doc/Documentation/networking/filter.txt。
+
+#### 3.1.6.Loading the Program into the Kernel
+
+我们可以通过`bpftool`工具来将程序加载到Kernel中：
+
+```bash
+# bpftool prog load hello-net.bpf.o /sys/fs/bpf/hello
+```
+
+通过`bpftool`工具可以列出所有加载到Kernel中的eBPF程序：
+
+```
+# bpftool prog list
+...
+14: cgroup_skb  tag 6deef7357e7b4530  gpl
+        loaded_at 2023-05-24T02:46:54+0000  uid 0
+        xlated 64B  jited 96B  memlock 4096B
+27: xdp  name hello  tag 4ae0216d65106432  gpl
+        loaded_at 2023-05-24T10:39:28+0000  uid 0
+        xlated 168B  jited 200B  memlock 4096B  map_ids 3
+        btf_id 117
+```
 
